@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./clamav.nix
     ];
 
   # Bootloader.
@@ -23,6 +24,17 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+
+  networking.firewall = {
+    enable = true;
+    allowPing = false;
+    allowedTCPPorts = [ ];
+    allowedUDPPorts = [ ];
+    allowedTCPPortRanges = [ ];
+    allowedUDPPortRanges = [ ];
+
+    logRefusedConnections = false;
+  };
 
   # Set your time zone.
   time.timeZone = "America/Recife";
@@ -90,7 +102,7 @@
 
   programs.java = {
     enable = true;
-    package = pkgs.jdk24;
+    package = pkgs.jdk25;
   };
 
   programs.zsh.enable = true;
@@ -110,6 +122,9 @@
     description = "Miguel Peixoto Portela Bispo";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
+      # gaming
+      pcsx2
+      retroarch-free
       # UI setup
       mako
       waybar
@@ -122,19 +137,22 @@
       sway-contrib.grimshot
       foot
       # coding
+      musl
       jetbrains.idea-community
       git
       gcc
+      clang
       cmake
       vscode
       python3
-      nodejs
+      nodejs_24
       claude-code
-      kdePackages.kate
       coursier
       maven
-      gradle
+      gradle_9
       bun
+      jdk
+      gnumake
       # LSPs
       lemminx
       luajitPackages.lua-lsp
@@ -147,6 +165,8 @@
       # browsers
       chromium
       # CLIs and TUIs
+      watchexec
+      smartmontools
       jq
       htop
       tmux
@@ -154,6 +174,7 @@
       curl
       zip
       unzip
+      clamav
     ];
   };
   fonts.packages = with pkgs; [
