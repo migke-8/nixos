@@ -3,14 +3,21 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
+let
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
+in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./clamav.nix
+      # ./clamav.nix
+      (import "${home-manager}/nixos")
     ];
 
+  home-manager.useUserPackages = true;
+  home-manager.useGlobalPkgs = true;
+  home-manager.backupFileExtension = "backup";
+  home-manager.users.miguel = import ./home.nix;
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -22,9 +29,6 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable networking
-  networking.networkmanager.enable = true;
-
   networking.firewall = {
     enable = true;
     allowPing = false;
@@ -35,6 +39,10 @@
 
     logRefusedConnections = false;
   };
+
+
+  # Enable networking
+  networking.networkmanager.enable = true;
 
   # Set your time zone.
   time.timeZone = "America/Recife";
@@ -55,12 +63,11 @@
   };
 
   # Enable the X11 windowing system.
-  # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
 
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # Enable the GNOME Desktop Environment.
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
@@ -89,12 +96,41 @@
     # no need to redefine it in your config for now)
     #media-session.enable = true;
   };
-
-  # Enable the gnome-keyring secrets vault. 
-  # Will be exposed through DBus to programs willing to store secrets.
-  services.gnome.gnome-keyring.enable = true;
-
-  # enable Sway window manager
+  services.seatd.enable = true;
+  # programs.dwl = {
+  #   enable = true;
+  #   package = pkgs.dwl.overrideAttrs (oldAttrs: {
+  #     nativeBuildInputs = with pkgs; [
+  #       installShellFiles
+  #       pkg-config
+  #       wayland-scanner
+  #     ];
+  #     buildInputs = with pkgs; [
+  #       libinput
+  #       xorg.libxcb
+  #       libxkbcommon
+  #       pixman
+  #       wayland
+  #       wayland-protocols
+  #       xorg.libX11
+  #       xorg.xcbutilwm
+  #       pkgs.wlroots_0_19
+  #       libdrm
+  #     ];
+  #     enable = true;
+  #     src = ./config/dwl;
+  #     __structuredAttrs = true;
+  #     makeFlags = [
+  #       "CC=clang"
+  #       "PKG_CONFIG=${pkgs.clangStdenv.cc.targetPrefix}pkg-config"
+  #       "WAYLAND_SCANNER=wayland-scanner"
+  #       "PREFIX=$(out)"
+  #       "MANDIR=$(man)/share/man"
+  #       ''XWAYLAND="-DXWAYLAND"''
+  #       ''XLIBS="xcb xcb-icccm"''
+  #     ];
+  #   });
+  # };
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
@@ -110,9 +146,7 @@
     defaultEditor = true;
     enable = true;
   };
-
-  users.defaultUserShell = pkgs.zsh; # Sets Zsh as the default for all users
-
+  users.defaultUserShell = pkgs.zsh;
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
@@ -121,62 +155,9 @@
     isNormalUser = true;
     description = "Miguel Peixoto Portela Bispo";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      # gaming
-      pcsx2
-      retroarch-free
-      # UI setup
-      mako
-      waybar
-      wofi
-      wl-clipboard
-      grim
-      swaylock
-      swaybg
-      swayidle
-      sway-contrib.grimshot
-      foot
-      # coding
-      musl
-      jetbrains.idea-community
-      git
-      gcc
-      clang
-      cmake
-      vscode
-      python3
-      nodejs_24
-      claude-code
-      coursier
-      maven
-      gradle_9
-      bun
-      jdk
-      gnumake
-      # LSPs
-      lemminx
-      luajitPackages.lua-lsp
-      bash-language-server
-      nodePackages.vscode-langservers-extracted
-      typescript-language-server
-      vscode-css-languageserver
-      jdt-language-server
-      clang-tools
-      # browsers
-      chromium
-      # CLIs and TUIs
-      watchexec
-      smartmontools
-      jq
-      htop
-      tmux
-      wget
-      curl
-      zip
-      unzip
-      clamav
-    ];
-  };
+    packages = with pkgs; import ./packages.nix { inherit pkgs; };
+};
+
   fonts.packages = with pkgs; [
     nerd-fonts.mononoki
     nerd-fonts.arimo
@@ -219,6 +200,8 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  programs.gamemode.enable = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   system.stateVersion = "25.05"; # Did you read the comment?
 
 }

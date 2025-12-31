@@ -40,8 +40,8 @@
 
   systemd.tmpfiles.rules = [
     "d /var/log/clamav 0755 clamav clamav -"
-    "f /var/log/clamav/freshclam.log 0644 clamav clamav -"
-    "d /var/lib/clamav/quarantine 0755 clamav clamav -"
+    "f /var/log/clamav/freshclam.log 0774 clamav clamav -"
+    "d /var/lib/clamav/quarantine 0760 clamav clamav -"
     "d /var/lib/clamav/tmp 0755 clamav clamav -"
   ];
 
