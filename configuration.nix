@@ -141,6 +141,12 @@ in
     package = pkgs.jdk25;
   };
 
+  programs.gnupg.agent = {
+    enable = true;
+    pinentryPackage = pkgs.pinentry-curses; # Best for terminal-heavy workflows
+    enableSSHSupport = true;
+  };
+
   programs.zsh.enable = true;
   programs.neovim = {
     defaultEditor = true;
@@ -175,6 +181,32 @@ in
   #  wget
   ];
 
+
+
+
+systemd.services.my-custom-script = {
+  description = "Runs a custom command every 30 minutes";
+  script = ./script/remenber-water.sh;
+  # Optional: defines the user the script runs as
+  serviceConfig = {
+    User = "your-username";
+    Type = "oneshot";
+  };
+};
+
+systemd.timers.my-custom-script-timer = {
+  description = "Timer for my custom script";
+  # Ensures the service starts when the timer is activated
+  wantedBy = [ "timers.target" ];
+  # Activates the corresponding service file
+  unit = "my-custom-script.service";
+  # Sets the schedule (every 30 minutes)
+  timerConfig = {
+    OnCalendar = "*:0/30:0";
+    # Ensures the job runs shortly after boot if the time has passed
+    Persistent = true;
+  };
+};
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

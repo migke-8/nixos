@@ -27,14 +27,16 @@ with pkgs; [
   emacs
   # coding
   musl
+  clang
   jetbrains.idea-community
   cmake
   vscode
   claude-code
   gnumake
-  chromium
   # CLIs and TUIs
+  gemini-cli
   watchexec
+  gzip
   smartmontools
   jq
   htop
