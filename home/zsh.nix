@@ -18,21 +18,29 @@
         + "$PATH:$HOME/.local/bin"
         + "HOME/bin:$HOME/bin/custom-scripts:$PATH";
     };
-    enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = ''
+      # theme
       setopt PROMPT_SUBST
       local THEME_FILE="/etc/nixos/config/zsh/theme.zsh"
       [ -f "$THEME_FILE" ] && source $THEME_FILE || echo "theme with name \"$ZSH_THEME_NAME\" was not found\n"
 
-      setopt HIST_SAVE_NO_DUPS
+      # auto completion
+      autoload -U compinit; compinit
+      _comp_options+=(globdots)
+      zstyle ':completion:*' menu select
+      zstyle ':completion:*' file-sort modification
+
+      # history
       autoload -U up-line-or-beginning-search
       autoload -U down-line-or-beginning-search
       zle -N up-line-or-beginning-search
       zle -N down-line-or-beginning-search
-      bindkey "\$\{terminfo[kcuu1]}" up-line-or-beginning-search
-      bindkey "\$\{terminfo[kcud1]}" down-line-or-beginning-search
+
+      # Use [[ -n ]] to check if terminfo caps exist before binding
+      [[ -n "''${terminfo[kcuu1]}" ]] && bindkey "''${terminfo[kcuu1]}" up-line-or-beginning-search
+      [[ -n "''${terminfo[kcud1]}" ]] && bindkey "''${terminfo[kcud1]}" down-line-or-beginning-search
     '';
     shellAliases = {
       ll = "ls -l";
