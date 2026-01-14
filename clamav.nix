@@ -62,36 +62,4 @@
       '';
     };
   };
-
-  ################################
-  ## Realtime Scanner (Inotify) ##
-  ################################
-
-  environment.systemPackages = [
-    pkgs.inotify-tools
-  ];
-
-  systemd.services.clamav-realtime = {
-    enable = true;
-    description = "Realtime ClamAV Antivirus Scanner";
-
-    after = [ "clamav-daemon.service" ];
-    wants = [ "clamav-daemon.service" ];
-
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Restart = "always";
-      RestartSec = 2;
-
-      ExecStart = ''
-        ${pkgs.inotify-tools}/bin/inotifywait -m -e create,modify /home \
-        | while read -r dir action file; do
-            echo "Scanning: $dir$file" | systemd-cat -t clamav-realtime
-            /run/current-system/sw/bin/clamdscan --fdpass "$dir$file" \
-              --move=/var/lib/clamav/quarantine
-          done
-      '';
-    };
-  };
 }

@@ -1,18 +1,18 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
-let
-  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
-in
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      # ./clamav.nix
-      (import "${home-manager}/nixos")
-    ];
+  config,
+  pkgs,
+  ...
+}: let
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
+in {
+  imports = [
+    ./hardware-configuration.nix
+    ./clamav.nix
+    (import "${home-manager}/nixos")
+  ];
 
   home-manager.useUserPackages = true;
   home-manager.useGlobalPkgs = true;
@@ -32,14 +32,15 @@ in
   networking.firewall = {
     enable = true;
     allowPing = false;
-    allowedTCPPorts = [ ];
-    allowedUDPPorts = [ ];
-    allowedTCPPortRanges = [ ];
-    allowedUDPPortRanges = [ ];
+    allowedTCPPorts = [
+      # 22
+    ];
+    allowedUDPPorts = [];
+    allowedTCPPortRanges = [];
+    allowedUDPPortRanges = [];
 
     logRefusedConnections = false;
   };
-
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -69,19 +70,15 @@ in
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
-  # Configure keymap in X11
   services.xserver.xkb = {
     layout = "br";
     variant = "";
   };
-
-  # Configure console keymap
+  services.libinput.enable = true;
   console.keyMap = "br-abnt2";
 
-  # Enable CUPS to print documents.
   services.printing.enable = true;
 
-  # Enable sound with pipewire.
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -89,48 +86,9 @@ in
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
   };
   services.seatd.enable = true;
-  # programs.dwl = {
-  #   enable = true;
-  #   package = pkgs.dwl.overrideAttrs (oldAttrs: {
-  #     nativeBuildInputs = with pkgs; [
-  #       installShellFiles
-  #       pkg-config
-  #       wayland-scanner
-  #     ];
-  #     buildInputs = with pkgs; [
-  #       libinput
-  #       xorg.libxcb
-  #       libxkbcommon
-  #       pixman
-  #       wayland
-  #       wayland-protocols
-  #       xorg.libX11
-  #       xorg.xcbutilwm
-  #       pkgs.wlroots_0_19
-  #       libdrm
-  #     ];
-  #     enable = true;
-  #     src = ./config/dwl;
-  #     __structuredAttrs = true;
-  #     makeFlags = [
-  #       "CC=clang"
-  #       "PKG_CONFIG=${pkgs.clangStdenv.cc.targetPrefix}pkg-config"
-  #       "WAYLAND_SCANNER=wayland-scanner"
-  #       "PREFIX=$(out)"
-  #       "MANDIR=$(man)/share/man"
-  #       ''XWAYLAND="-DXWAYLAND"''
-  #       ''XLIBS="xcb xcb-icccm"''
-  #     ];
-  #   });
-  # };
+
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
@@ -138,31 +96,33 @@ in
 
   programs.java = {
     enable = true;
-    package = pkgs.jdk25;
+    package = pkgs.jdk21;
   };
 
   programs.gnupg.agent = {
     enable = true;
-    pinentryPackage = pkgs.pinentry-curses; # Best for terminal-heavy workflows
+    pinentryPackage = pkgs.pinentry-curses;
     enableSSHSupport = true;
   };
 
-  programs.zsh.enable = true;
   programs.neovim = {
     defaultEditor = true;
     enable = true;
   };
-  users.defaultUserShell = pkgs.zsh;
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  programs.zsh.enable = true;
+
   users.users.miguel = {
     isNormalUser = true;
     description = "Miguel Peixoto Portela Bispo";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; import ./packages.nix { inherit pkgs; };
-};
+    extraGroups = ["networkmanager" "wheel"];
+    packages =
+      import ./packages/packages.nix {inherit pkgs;}
+      ++ import ./packages/coding-packages.nix {inherit pkgs;}
+      ++ import ./packages/cli-tui-packages.nix {inherit pkgs;}
+      ++ import ./packages/rice-packages.nix {inherit pkgs;};
+    shell = pkgs.zsh;
+  };
 
   fonts.packages = with pkgs; [
     nerd-fonts.mononoki
@@ -174,58 +134,28 @@ in
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-  ];
-
-
-
-
-systemd.services.my-custom-script = {
-  description = "Runs a custom command every 30 minutes";
-  script = ./script/remenber-water.sh;
-  # Optional: defines the user the script runs as
-  serviceConfig = {
-    User = "your-username";
-    Type = "oneshot";
+  # 1. Define the systemd service
+  systemd.user.services.reminder-timer = {
+    description = "Send a notification reminder";
+    serviceConfig = {
+      Type = "oneshot";
+      # ${pkgs.libnotify}/bin/notify-send ensures the tool is available
+      # even if it's not installed system-wide.
+      ExecStart = "${pkgs.libnotify}/bin/notify-send 'Drink water!' 'Just remembering...' -i alarm-clock";
+    };
   };
-};
 
-systemd.timers.my-custom-script-timer = {
-  description = "Timer for my custom script";
-  # Ensures the service starts when the timer is activated
-  wantedBy = [ "timers.target" ];
-  # Activates the corresponding service file
-  unit = "my-custom-script.service";
-  # Sets the schedule (every 30 minutes)
-  timerConfig = {
-    OnCalendar = "*:0/30:0";
-    # Ensures the job runs shortly after boot if the time has passed
-    Persistent = true;
+  # 2. Define the timer (The 'Cron' part)
+  systemd.user.timers.reminder-timer = {
+    description = "Run the reminder for drinking water";
+    timerConfig = {
+      OnCalendar = "*:0/15:00";
+      Persistent = true;
+    };
+    wantedBy = ["timers.target"];
   };
-};
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
+  services.openssh.enable = true;
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
@@ -233,7 +163,6 @@ systemd.timers.my-custom-script-timer = {
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.gamemode.enable = true;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   system.stateVersion = "25.05"; # Did you read the comment?
-
 }

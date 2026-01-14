@@ -1,7 +1,13 @@
-{ pkgs, config, ... }:
 {
+  pkgs,
+  config,
+  ...
+}: {
   programs.vim = {
     enable = true;
+    plugins = with pkgs.vimPlugins; [
+      gruvbox
+    ];
     extraConfig = ''
       set tabstop=2
       set shiftwidth=2
@@ -16,6 +22,7 @@
       set cmdheight=2
       set spell
       set spelllang=en_us
+      colorscheme gruvbox
     '';
   };
 }

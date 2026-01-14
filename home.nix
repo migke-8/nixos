@@ -8,6 +8,8 @@
     ./home/git.nix
     ./home/tmux.nix
     ./home/vim.nix
+    ./home/kitty.nix
+    ./home/zsh.nix
   ];
   
   xdg.mimeApps = {
