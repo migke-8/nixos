@@ -21,6 +21,11 @@ in {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.plymouth.enable = true;
+  boot.plymouth.theme = "bgrt";
+  boot.loader.systemd-boot.consoleMode = "max";
+  boot.plymouth.logo = "${pkgs.nixos-icons}/share/icons/hicolor/128x128/apps/nix-snowflake.png";
+  boot.kernelParams = ["quiet" "splash"];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -31,15 +36,12 @@ in {
 
   networking.firewall = {
     enable = true;
-    allowPing = false;
-    allowedTCPPorts = [
-      # 22
-    ];
-    allowedUDPPorts = [];
+    allowPing = true;
+    allowedTCPPorts = [25565];
+    allowedUDPPorts = [25565];
     allowedTCPPortRanges = [];
     allowedUDPPortRanges = [];
-
-    logRefusedConnections = false;
+    logRefusedConnections = true;
   };
 
   # Enable networking
@@ -105,17 +107,16 @@ in {
     enableSSHSupport = true;
   };
 
-  programs.neovim = {
-    defaultEditor = true;
-    enable = true;
-  };
-
   programs.zsh.enable = true;
+
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball "https://github.com/PolyMC/PolyMC/archive/develop.tar.gz")).overlay
+  ];
 
   users.users.miguel = {
     isNormalUser = true;
     description = "Miguel Peixoto Portela Bispo";
-    extraGroups = ["networkmanager" "wheel"];
+    extraGroups = ["networkmanager" "wheel" "libvirtd" "kvm"];
     packages =
       import ./packages/packages.nix {inherit pkgs;}
       ++ import ./packages/coding-packages.nix {inherit pkgs;}
@@ -156,6 +157,11 @@ in {
   };
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
@@ -165,4 +171,23 @@ in {
   programs.gamemode.enable = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
   system.stateVersion = "25.05"; # Did you read the comment?
+  virtualisation.libvirtd.enable = true;
+  boot.kernelModules = ["kvm-amd" "kvm-intel"];
+  # virtualisation.libvirtd.qemu = {
+  #   package = pkgs.qemu_kvm;
+  #   runAsRoot = true;
+  #   swtpm.enable = true;
+  # };
+  virtualisation.libvirtd = {
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true; # Tente mudar para true se estiver false
+      swtpm.enable = true; # Necessário para Windows 11 (TPM)
+    };
+  };
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc
+    zlib
+  ];
 }

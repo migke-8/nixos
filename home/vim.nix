@@ -6,7 +6,7 @@
   programs.vim = {
     enable = true;
     plugins = with pkgs.vimPlugins; [
-      gruvbox
+      sonokai
     ];
     extraConfig = ''
       set tabstop=2
@@ -22,7 +22,9 @@
       set cmdheight=2
       set spell
       set spelllang=en_us
-      colorscheme gruvbox
+      set background=dark
+      set termguicolors
+      colorscheme sonokai
     '';
   };
 }

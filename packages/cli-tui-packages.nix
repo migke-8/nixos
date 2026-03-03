@@ -13,4 +13,5 @@ in
     zip
     unzip
     clamav
+    bat
   ]

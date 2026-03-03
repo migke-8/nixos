@@ -1,6 +1,7 @@
 {pkgs}: let
 in
   with pkgs; [
+    gammastep
     mako
     waybar
     wofi
@@ -15,4 +16,5 @@ in
     sway-contrib.grimshot
     swaybg
     swayidle
+    nnn
   ]

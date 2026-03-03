@@ -10,6 +10,7 @@
     ./home/vim.nix
     ./home/kitty.nix
     ./home/zsh.nix
+    ./home/nvim.nix
   ];
   
   xdg.mimeApps = {
