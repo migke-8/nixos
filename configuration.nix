@@ -10,11 +10,6 @@
     ./hardware-configuration.nix
     ./clamav.nix
   ];
-
-  home-manager.useUserPackages = true;
-  home-manager.useGlobalPkgs = true;
-  home-manager.backupFileExtension = "backup";
-  home-manager.users.miguel = import ./home.nix;
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
