@@ -4,12 +4,9 @@ in
     gammastep
     mako
     waybar
-    wofi
     grim
     foot
     dunst
-    rofi
-    ringboard
     libnotify
     wl-clipboard
     swaylock
@@ -17,4 +14,5 @@ in
     swaybg
     swayidle
     nnn
+    cava
   ]

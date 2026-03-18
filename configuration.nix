@@ -5,13 +5,10 @@
   config,
   pkgs,
   ...
-}: let
-  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
-in {
+}: {
   imports = [
     ./hardware-configuration.nix
     ./clamav.nix
-    (import "${home-manager}/nixos")
   ];
 
   home-manager.useUserPackages = true;
@@ -25,7 +22,12 @@ in {
   boot.plymouth.theme = "bgrt";
   boot.loader.systemd-boot.consoleMode = "max";
   boot.plymouth.logo = "${pkgs.nixos-icons}/share/icons/hicolor/128x128/apps/nix-snowflake.png";
-  boot.kernelParams = ["quiet" "splash"];
+  boot.kernelParams = [
+    "quiet"
+    "splash"
+    "intel_iommu=on"
+    "iommu=pt"
+  ];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -185,6 +187,8 @@ in {
       swtpm.enable = true; # Necessário para Windows 11 (TPM)
     };
   };
+  programs.virt-manager.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     stdenv.cc.cc
