@@ -7,7 +7,7 @@
     };
   };
   outputs = { nixpkgs, home-manager, ... }: {
-    nixosConfigurations.localhost = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
