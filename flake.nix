@@ -7,7 +7,7 @@
     };
   };
   outputs = { nixpkgs, home-manager, ... }: {
-    nixosConfigurations.meu-pc = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.localhost = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
