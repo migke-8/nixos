@@ -22,4 +22,8 @@
       "application/pdf" = ["chromium.desktop"];
     };
   };
+  home.packages = [
+    pkgs.nerd-fonts.arimo
+    pkgs.nerd-fonts.mononoki
+  ];
 }

@@ -215,7 +215,7 @@
       # extra
       ripgrep
     ];
-    extraLuaConfig = ''
+    initLua = ''
       -- **************
       -- editor config
       -- **************
