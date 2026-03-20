@@ -4,6 +4,7 @@
 {
   config,
   pkgs,
+  polymc,
   ...
 }: {
   imports = [
@@ -107,7 +108,7 @@
   programs.zsh.enable = true;
 
   nixpkgs.overlays = [
-    (import (builtins.fetchTarball "https://github.com/PolyMC/PolyMC/archive/develop.tar.gz")).overlay
+    polymc.overlay
   ];
 
   users.users.miguel = {

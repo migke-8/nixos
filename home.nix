@@ -2,14 +2,11 @@
 {
   home.username = "miguel";
   home.homeDirectory = "/home/miguel";
-  home.stateVersion = "unstable";
+  home.stateVersion = "25.11";
   imports = [
-    # ./home/ringboard.nix
+    ./home/sway.nix
     ./home/foot.nix
     ./home/git.nix
-    ./home/tmux.nix
-    ./home/vim.nix
-    ./home/kitty.nix
     ./home/zsh.nix
     ./home/nvim.nix
     ./home/rofi.nix
@@ -21,6 +18,4 @@
       "application/pdf" = [ "chromium.desktop" ];
     };
   };
-
-  home.packages = [ pkgs.chromium pkgs.ringboard-wayland ];
 }

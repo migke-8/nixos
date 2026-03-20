@@ -93,8 +93,9 @@
     shellAliases = {
       ll = "ls -l";
       ls = "ls --color";
-      update = "sudo nixos-rebuild switch";
-      upgrade = "sudo nixos-rebuild switch";
+      update = "sudo nixos-rebuild switch --flake ~/nixos/.#nixos";
+      upgrade = "sudo nixos-rebuild switch --flake --upgrade ~/nixos/.#nixos";
+
     };
   };
 }

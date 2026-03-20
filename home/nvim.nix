@@ -75,18 +75,9 @@
         plugin = nvim-treesitter.withAllGrammars;
         type = "lua";
         config = ''
-          local configs = require("nvim-treesitter.configs")
-          configs.setup({
-            highlight = {
-              enable = true
-            },
-            indent = {
-              enable = true,
-              disable = {
-                  "java", "html", "javascript", "typescript"
-              }
-            }
-          })
+          require('nvim-treesitter').setup {
+            install_dir = vim.fn.stdpath('data') .. '/site'
+          }
         '';
       }
       {
@@ -434,7 +425,7 @@
       vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
 
       -- **************
-      -- markdown 
+      -- markdown
       -- **************
 
       require("render-markdown").setup({ render_modes = { "n" } })
