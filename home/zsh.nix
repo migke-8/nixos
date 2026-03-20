@@ -95,8 +95,7 @@
       ll = "ls -l";
       ls = "ls --color";
       update = "sudo nixos-rebuild switch --flake $NIXOS_HOME#nixos";
-      upgrade = "sudo nixos-rebuild switch --flake --upgrade $NIXOS_HOME#nixos";
-
+      upgrade = "sudo nixos-rebuild switch --upgrade --flake $NIXOS_HOME#nixos";
     };
   };
 }

@@ -7,8 +7,8 @@
   home.homeDirectory = "/home/miguel";
   home.stateVersion = "25.11";
   imports = [
-    ./home/waybar.nix
     ./home/sway/config.nix
+    ./home/waybar.nix
     ./home/foot.nix
     ./home/git.nix
     ./home/zsh.nix

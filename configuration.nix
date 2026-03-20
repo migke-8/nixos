@@ -99,7 +99,7 @@
     pinentryPackage = pkgs.pinentry-curses;
     enableSSHSupport = true;
   };
-
+  programs.sway.enable = true;
   programs.chromium.enable = true;
 
   programs.zsh.enable = true;
