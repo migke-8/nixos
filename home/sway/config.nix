@@ -1,4 +1,7 @@
 {pkgs, ...}: {
+  imports = [
+    ./keybindings.nix
+  ];
   home.packages = with pkgs; [
     swaybg
   ];
@@ -22,10 +25,11 @@
           bg = "${./images/ivyssaur.png} fill";
         };
       };
-      font = "ArimoNerdFontPropo 15";
-      titlebar_border_thickness = 0;
-      titlebar_padding = 2;
-      title_align = "center";
+      fonts = ["ArimoNerdFontPropo 15"];
+      window = {
+        titlebar = false;
+        border = 0;
+      };
       bars = [];
       gaps.inner = 10;
     };
