@@ -17,11 +17,17 @@
           dwt = "disabled";
         };
       };
+      output = {
+        "*" = {
+          bg = "${./images/ivyssaur.png} fill";
+        };
+      };
+      font = "ArimoNerdFontPropo 15";
+      titlebar_border_thickness = 0;
+      titlebar_padding = 2;
+      title_align = "center";
       bars = [];
       gaps.inner = 10;
-      startup = [
-        {command = "${pkgs.swaybg}/bin/swaybg -i $HOME/nixos/home/sway/images/ivyssaur.jpg -m fill";}
-      ];
     };
   };
 }

@@ -89,11 +89,6 @@
   };
   services.seatd.enable = true;
 
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-  };
-
   programs.java = {
     enable = true;
     package = pkgs.jdk21;
@@ -104,6 +99,8 @@
     pinentryPackage = pkgs.pinentry-curses;
     enableSSHSupport = true;
   };
+
+  programs.chromium.enable = true;
 
   programs.zsh.enable = true;
 
