@@ -8,7 +8,7 @@
   home.stateVersion = "25.11";
   imports = [
     ./home/waybar.nix
-    ./home/sway.nix
+    ./home/sway/sway.nix
     ./home/foot.nix
     ./home/git.nix
     ./home/zsh.nix

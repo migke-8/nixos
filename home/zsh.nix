@@ -18,6 +18,7 @@
         + "$PATH:$HOME/.local/bin"
         + "HOME/bin:$HOME/bin/custom-scripts:$PATH";
       NNN_TRASH = 1;
+      NIXOS_HOME = "$HOME/nixos";
     };
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
@@ -93,8 +94,8 @@
     shellAliases = {
       ll = "ls -l";
       ls = "ls --color";
-      update = "sudo nixos-rebuild switch --flake ~/nixos/.#nixos";
-      upgrade = "sudo nixos-rebuild switch --flake --upgrade ~/nixos/.#nixos";
+      update = "sudo nixos-rebuild switch --flake $NIXOS_HOME#nixos";
+      upgrade = "sudo nixos-rebuild switch --flake --upgrade $NIXOS_HOME#nixos";
 
     };
   };
