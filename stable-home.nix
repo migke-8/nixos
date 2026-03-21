@@ -10,9 +10,6 @@
     ./home/sway/config.nix
     ./home/waybar.nix
     ./home/foot.nix
-    ./home/git.nix
-    ./home/zsh/config.nix
-    ./home/nvim.nix
     ./home/rofi/config.nix
   ];
 

@@ -23,7 +23,7 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.miguel = import ./home.nix;
+          home-manager.users.miguel = import ./stable-home.nix;
         }
       ];
     };
