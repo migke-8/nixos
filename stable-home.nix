@@ -11,6 +11,7 @@
     ./home/waybar/config.nix
     ./home/foot.nix
     ./home/rofi/config.nix
+    ./home/gammastep.nix
   ];
 
   xdg.mimeApps = {
