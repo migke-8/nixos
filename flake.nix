@@ -25,6 +25,12 @@
           home-manager.useUserPackages = true;
           home-manager.users.miguel = import ./stable-home.nix;
         }
+home-manager-unstable.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.miguel = import ./unstable-home.nix;
+        }
       ];
     };
     };

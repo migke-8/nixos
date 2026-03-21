@@ -5,7 +5,7 @@
   home.stateVersion = "25.11";
   imports = [
     ./home/git.nix
-    ./home/nvim.nix
+    ./home/neovim/config.nix
     ./home/zsh/config.nix
   ];
 }
