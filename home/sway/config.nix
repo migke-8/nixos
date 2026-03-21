@@ -101,7 +101,7 @@ in {
 
         # Custom Scripts & Multimedia
         "${mod}+Ctrl+${left}" = "exec ${./scripts/swapws.sh} Left";
-        "${mod}+Ctrl+${right}" = "exec ${./scripts/swapws.sh} Left";
+        "${mod}+Ctrl+${right}" = "exec ${./scripts/swapws.sh} Right";
         "${mod}+Shift+t" = "exec ${./scripts/toggleidle.sh}";
 
         "XF86AudioMute" = "exec pactl set-sink-mute @DEFAULT_SINK@ toggle";

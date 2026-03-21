@@ -17,6 +17,6 @@ with pkgs; [
   libreoffice
   gimp3
   kdePackages.kdenlive
-  frei0r # Essential for many effects
-  ffmpeg-full # Ensures all codecs work
+  frei0r
+  ffmpeg-full
 ]

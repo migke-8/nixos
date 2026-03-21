@@ -13,7 +13,7 @@
     ./home/git.nix
     ./home/zsh.nix
     ./home/nvim.nix
-    ./home/rofi.nix
+    ./home/rofi/config.nix
   ];
 
   xdg.mimeApps = {

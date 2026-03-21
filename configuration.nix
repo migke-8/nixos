@@ -120,10 +120,6 @@
     shell = pkgs.zsh;
   };
 
-  fonts.packages = with pkgs; [
-    nerd-fonts.mononoki
-    nerd-fonts.arimo
-  ];
   # Install firefox.
   programs.firefox.enable = true;
 
@@ -155,7 +151,7 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 30d";
+    options = "--delete-older-than 7d";
   };
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

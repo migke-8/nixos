@@ -1,0 +1,113 @@
+configuration {
+  display-drun: "apps";
+modes: "drun";
+font: "ArimoNerdFontPropo 15";
+      show-icons: true;
+      fixed-num-lines: true;
+terminal: "foot";
+          drun-display-format: "{icon} {name}";
+          kb-move-char-back: "Shift+Left";
+          kb-move-char-forward: "Shift+Right";
+          kb-mode-next: "Control+Tab";
+          kb-mode-previous: "Control+ISO_Left_Tab";
+          ml-row-left: "Left";
+          ml-row-right: "Right";
+          timeout {
+action: "kb-cancel";
+delay:  0;
+          }
+          filebrowser {
+            directories-first: true;
+            sorting-method:    "name";
+          }
+}
+* {
+  selected-normal-foreground: rgba(253, 255, 241, 1);
+  normal-spacing: 0;
+foreground: rgba(253, 255, 241, 1);
+            normal-foreground: rgba(253, 255, 241, 1);
+            alternate-normal-background: transparent;
+            selected-urgent-foreground: rgba(249, 38, 114, 1);
+            urgent-foreground: rgba(249, 38, 114, 1);
+            alternate-urgent-background: transparent;
+            active-foreground: rgba(249, 38, 114, 1);
+            selected-active-foreground: rgba(253, 255, 241, 1);
+            alternate-active-background: transparent;
+background: transparent;
+bordercolor: transparent;
+             alternate-normal-foreground: rgba(253, 255, 241, 1);
+             normal-background: transparent;
+lightfg: transparent;
+         selected-normal-background: transparent;
+         border-color: transparent;
+spacing: transparent;
+         urgent-background: transparent;
+separatorcolor: transparent;
+                selected-urgent-background: transparent;
+                alternate-urgent-foreground: rgba(249, 38, 114, 1);
+                background-color: transparent;
+                alternate-active-foreground: rgba(253, 255, 241, 1);
+                active-background: transparent;
+                selected-active-background: rgba(249, 38, 114, 1);
+}
+window {
+  font-size: 4em;
+width: 35em;
+height: 35em;
+        background-color: rgba(39, 40, 34, 0.7);
+border: none;
+padding: 0;
+}
+mainbox {
+children: [inputbar, listview];
+padding: 0;
+}
+inputbar {
+  border-color: rgba(253, 255, 241, 1);
+children: [prompt, textbox-prompt-colon, entry];
+position: center;
+expand: false;
+padding: 1em;
+         border-color: rgba(253, 255, 241, 1);
+border: 0 solid 0 solid 0.2em solid;
+}
+prompt, textbox-prompt-colon {
+font: "ArimoNerdFontPropo bold 24";
+}
+entry {
+font: "ArimoNerdFontPropo 24";
+}
+prompt {
+}
+entry {
+}
+element-icon {
+size: 125px;
+      horizontal-align: 0.5;
+}
+element {
+width: 200px;
+height: 200px;
+orientation: vertical;
+padding: 10px 10px 13px 10px;
+}
+element selected.normal {
+font: "ArimoNerdFontPropo Bold 15";
+      background-color: rgba(253, 255, 241, 0.4);
+}
+element-text {
+font: inherit;
+      horizontal-align: 0.5;
+highlight: bold #ae81ff;
+}
+element-text selected.normal {
+width: 200px;
+font: "ArimoPropoNerdFont 16px";
+}
+listview {
+flow: horizontal;
+columns: 4;
+lines: 4;
+scrollbar: false;
+           fixed-height: false;
+}
