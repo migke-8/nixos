@@ -1,6 +1,7 @@
 {pkgs, ...}: {
   programs.neovim = {
     defaultEditor = true;
+    package = pkgs.unstable.neovim;
     enable = true;
     plugins = with pkgs.vimPlugins; [
       monokai-pro-nvim
@@ -72,12 +73,12 @@
         type = "lua";
       }
       {
-        plugin = nvim-treesitter.withAllGrammars;
-        type = "lua";
+        plugin = nvim-treesitter.withPlugins (p: [
+          p.nix
+        ]);
+	type = "lua";
         config = ''
-          require('nvim-treesitter').setup {
-            install_dir = vim.fn.stdpath('data') .. '/site'
-          }
+          require('nvim-treesitter').setup { }
         '';
       }
       {
@@ -207,6 +208,7 @@
       typescript-language-server
       vscode-css-languageserver
       jdt-language-server
+      java-language-server
       clang-tools
       svelte-language-server
       metals
@@ -214,6 +216,7 @@
       scala-cli
       # extra
       ripgrep
+      tree-sitter
     ];
     initLua = ''
       -- **************

@@ -1,12 +1,16 @@
 {...}: {
-  programs.gammastep = {
+  services.gammastep = {
     enable = true;
-    temp-day = 6000;
-    temp-night = 5200;
-    brightness-day = 1.0;
-    brightness-night = 1.0;
-    location-provider = "manual";
-    lat = -8.04;
-    lon = -34.55;
+    temperature = {
+      day = 6000;
+      night = 5200;
+    };
+    brightness = {
+      day = 1.0;
+      night = 1.0;
+    };
+    provider = "manual";
+    latitude = -8.04;
+    longitude = -34.55;
   };
 }

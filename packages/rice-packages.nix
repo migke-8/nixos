@@ -1,11 +1,8 @@
 {pkgs}: let
 in
   with pkgs; [
-    gammastep
     mako
-    waybar
     grim
-    foot
     dunst
     libnotify
     wl-clipboard

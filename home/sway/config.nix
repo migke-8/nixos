@@ -139,6 +139,7 @@ in {
               before-sleep 'swaylock -f -c 000000'
           '';
         }
+        {command = "systemctl --user import-environment";}
       ];
 
       # Window Rules

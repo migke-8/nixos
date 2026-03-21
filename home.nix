@@ -12,6 +12,9 @@
     ./home/foot.nix
     ./home/rofi/config.nix
     ./home/gammastep.nix
+    ./home/git.nix
+    ./home/neovim/config.nix
+    ./home/zsh/config.nix
   ];
 
   xdg.mimeApps = {
