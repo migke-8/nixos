@@ -12,27 +12,33 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
   };
-  outputs = {nixpkgs, polymc, home-manager-stable, home-manager-unstable, ...} @ inputs: {
+  outputs = {
+    nixpkgs,
+    polymc,
+    home-manager-stable,
+    home-manager-unstable,
+    ...
+  } @ inputs: {
     nixosConfigurations = {
-    nixos = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = {inherit polymc;};
-      modules = [
-        ./configuration.nix
-        home-manager-stable.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.miguel = import ./stable-home.nix;
-        }
-home-manager-unstable.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.miguel = import ./unstable-home.nix;
-        }
-      ];
-    };
+      nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit polymc;};
+        modules = [
+          ./configuration.nix
+          home-manager-stable.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.miguel = import ./stable-home.nix;
+          }
+          home-manager-unstable.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.miguel = import ./unstable-home.nix;
+          }
+        ];
+      };
     };
   };
 }

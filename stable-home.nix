@@ -8,7 +8,7 @@
   home.stateVersion = "25.11";
   imports = [
     ./home/sway/config.nix
-    ./home/waybar.nix
+    ./home/waybar/config.nix
     ./home/foot.nix
     ./home/rofi/config.nix
   ];
