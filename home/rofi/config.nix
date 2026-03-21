@@ -7,7 +7,4 @@
     source = ./config.rasi;
     force = true;
   };
-  programs.rofi = {
-    enable = true;
-  };
 }

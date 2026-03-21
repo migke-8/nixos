@@ -72,7 +72,7 @@
 
       # theme
       setopt PROMPT_SUBST
-      local THEME_FILE="/etc/nixos/config/zsh/theme.zsh"
+      local THEME_FILE="${./themes/theme.zsh}"
       [ -f "$THEME_FILE" ] && source $THEME_FILE || echo "theme with name \"$ZSH_THEME_NAME\" was not found\n"
 
       # auto completion

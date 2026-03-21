@@ -11,7 +11,7 @@
     ./home/waybar.nix
     ./home/foot.nix
     ./home/git.nix
-    ./home/zsh.nix
+    ./home/zsh/config.nix
     ./home/nvim.nix
     ./home/rofi/config.nix
   ];
@@ -23,6 +23,7 @@
     };
   };
   home.packages = [
+    pkgs.rofi
     pkgs.nerd-fonts.arimo
     pkgs.nerd-fonts.mononoki
   ];
