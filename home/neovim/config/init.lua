@@ -1,5 +1,10 @@
 require("comp")
+require("treesitter")
 require("lsp")
+require("line")
+require("org")
+require("null")
+require("finder")
 require("file")
 require("theme")
 -- **************

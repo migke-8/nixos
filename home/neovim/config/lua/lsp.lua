@@ -4,10 +4,6 @@ local capable = function(config)
     return vim.tbl_deep_extend("keep", config, capable)
 end
 
-metals_config.settings = {
-  showImplicitArguments = true,
-  excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
-}
 local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -24,12 +20,11 @@ vim.lsp.enable("html")
 vim.lsp.enable("cssls")
 vim.lsp.enable("lua_ls")
 vim.lsp.config("lua_ls",  capable({
-  settings = {
-      formatting = {
-        command = {"stylua"}
-      }
-    }
-  }
+settings = {
+formatting = {
+command = {"stylua"}
+}
+}
 }))
 vim.lsp.config("nixd", capable({
   cmd = {"nixd"},
