@@ -17,12 +17,6 @@
     ./home/zsh/config.nix
   ];
 
-  xdg.mimeApps = {
-    enable = true;
-    defaultApplications = {
-      "application/pdf" = ["chromium.desktop"];
-    };
-  };
   home.packages = [
     pkgs.rofi
     pkgs.nerd-fonts.arimo
