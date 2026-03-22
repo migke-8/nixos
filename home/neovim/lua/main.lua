@@ -95,9 +95,3 @@ vim.keymap.set({"n", "t"}, "<leader>w", function()
     })
   end
 end)
-
--- **************
--- imports
--- **************
-
-require("plugins.theme")

@@ -2,7 +2,6 @@
 {
   programs.git = {
     enable = true;
-    package = pkgs.unstable.git;
     settings = {
       credential.helper = "cache --timeout=21600";
       init.defaultBranch = "main";

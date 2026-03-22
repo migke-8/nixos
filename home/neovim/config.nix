@@ -1,11 +1,19 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: let
+  importFilesIn = dir: 
+    lib.mapAttrs 
+    (name: _: builtins.readFile (dir + "/${name}")) 
+    (builtins.readDir dir);
+
+  plugins = importFilesIn ./lua/plugins;
+  main = builtins.readFile ./lua/main.lua;
+  luaFiles = builtins.attrValues plugins ++ [main];
+  luaConfig = builtins.concatStringsSep "\n" luaFiles;
+in{
   programs.neovim = {
     defaultEditor = true;
-    package = pkgs.unstable.neovim;
     enable = true;
-    plugins = with pkgs.unstable.vimPlugins; [
+    plugins = with pkgs.vimPlugins; [
       monokai-pro-nvim
-      vim-mustache-handlebars
       none-ls-nvim
       telescope-nvim
       nvim-cmp
@@ -20,38 +28,8 @@
       lualine-nvim
       render-markdown-nvim
       nvim-lspconfig
-      nvim-treesitter.withPlugins
-      (p: [
-        p.nix
-      ])
-      nvim-cmp
+      nvim-treesitter.withAllGrammars
     ];
-    extraPackages = with pkgs.unstable; [
-      # formatters
-      stylua
-      black
-      nodePackages.prettier
-      shfmt
-      alejandra
-      # lsp
-      nixd
-      lemminx
-      luajitPackages.lua-lsp
-      bash-language-server
-      nodePackages.vscode-langservers-extracted
-      typescript-language-server
-      vscode-css-languageserver
-      jdt-language-server
-      java-language-server
-      clang-tools
-      svelte-language-server
-      metals
-      coursier
-      scala-cli
-      # extra
-      ripgrep
-      tree-sitter
-    ];
-    extraLuaConfig = builtins.readFile ./lua/main.lua;
+    extraLuaConfig = luaConfig;
   };
 }

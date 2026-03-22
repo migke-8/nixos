@@ -1,11 +1,9 @@
 {
-  config,
   pkgs,
   ...
 }: {
   programs.zsh = {
     enable = true;
-    package = pkgs.unstable.git;
     sessionVariables = {
       XDG_CONFIG_HOME = "$HOME/.config";
       SHELL = "${pkgs.zsh}/bin/zsh";
