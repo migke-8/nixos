@@ -4,7 +4,7 @@
   ...
 }: {
   home.file.".config/nvim" = {
-    source = ./lua;
+    source = ./config;
     recursive = true;
   };
   programs.neovim = {

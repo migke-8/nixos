@@ -1,5 +1,4 @@
-return function()
-	require("oil").setup({
+require("oil").setup({
   default_file_explorer = true,
   columns = {
     "size",
@@ -31,4 +30,3 @@ return function()
 vim.keymap.set("n", "-", function()
   require("oil").open()
 end)
-end

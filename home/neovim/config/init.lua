@@ -1,5 +1,7 @@
 require("comp")
-require("file")()
+require("lsp")
+require("file")
+require("theme")
 -- **************
 -- editor config
 -- **************
