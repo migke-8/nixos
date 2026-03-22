@@ -7,10 +7,11 @@
 6. Neovim
 7. Gammastep
 8. Zsh
+9. Clamav (yes i use an linux anti virus software :))
 ## Theme:
 monokai
 ## Fonts:
 - arimoproponerd
 - mononokinerd
 ## Note:
-(please edit the git section at home/git.nix for your use case)
+it is opnionated. (please edit the git section at home/git.nix for your use case)
