@@ -1,6 +1,4 @@
-{ config, pkgs, lib, ... }:
-
-{
+{...}: {
   #############################
   ## ClamAV Daemon + Updater ##
   #############################
@@ -51,8 +49,8 @@
 
   systemd.services.clamav-scan = {
     description = "Daily ClamAV System Scan";
-    after = [ "network.target" "clamav-daemon.service" ];
-    wants = [ "clamav-daemon.service" ];
+    after = ["network.target" "clamav-daemon.service"];
+    wants = ["clamav-daemon.service"];
 
     serviceConfig = {
       Type = "oneshot";

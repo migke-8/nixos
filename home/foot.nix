@@ -18,7 +18,7 @@
         "underline-thickness" = "2px";
         blink = true;
       };
-      "colors-dark" = {
+      colors = {
         background = "272822";
         foreground = "fdfff1";
         regular0 = "6e7066";

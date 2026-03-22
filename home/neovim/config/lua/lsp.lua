@@ -1,9 +1,37 @@
+local cmp_nvim_lsp = require("cmp_nvim_lsp")
+local capable = function(config) 
+    local capable = cmp_nvim_lsp.default_capabilities()
+    return vim.tbl_deep_extend("keep", config, capable)
+end
+
+metals_config.settings = {
+  showImplicitArguments = true,
+  excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+}
+local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "scala", "sbt", "java" },
+  callback = function()
+    require("metals").initialize_or_attach(capable(require("metals").bare_config()))
+  end,
+  group = nvim_metals_group,
+})
 vim.lsp.enable("nixd")
 vim.lsp.enable("svelte")
 vim.lsp.enable("ts_ls")
 vim.lsp.enable("html")
 vim.lsp.enable("cssls")
-vim.lsp.config("nixd", {
+vim.lsp.enable("lua_ls")
+vim.lsp.config("lua_ls",  capable({
+  settings = {
+      formatting = {
+        command = {"stylua"}
+      }
+    }
+  }
+}))
+vim.lsp.config("nixd", capable({
   cmd = {"nixd"},
   settings = {
     nixd = {
@@ -15,8 +43,9 @@ vim.lsp.config("nixd", {
       }
     }
   }
-})
+}))
 vim.lsp.enable("clangd")
+vim.lsp.config("clangd", capable({}))
 
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)

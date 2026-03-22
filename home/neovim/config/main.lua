@@ -1,3 +1,5 @@
+require("comp")
+require("file")()
 -- **************
 -- editor config
 -- **************
