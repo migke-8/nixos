@@ -14,10 +14,19 @@ set_state() {
     export default_cd="$1"
     export NIX_SHELL="$2"
 }
-export default_cd="''${default_cd:-$HOME}"
+export default_cd="${default_cd:-$HOME}"
 handle_nix_enviroment() {
   if [[ -f flake.nix ]] ; then
     if [[ -z $NIX_SHELL ]] ; then
+      while [[ true ]]; do
+        echo "flake.nix found, do you wish to enter development enviroment?(y/n)"
+        read ENTER_ENV
+        if [[ $ENTER_ENV == "n" || $ENTER_ENV == "N" ]] ; then
+          return
+        elif [[ $ENTER_ENV == "y" || $ENTER_ENV == "Y" ]] ; then
+          break 
+        fi
+      done
       echo "flake.nix found. Entering nix develop environment..."
       echo "updating default cd enviroment..."
       set_state "$(pwd)" "in"

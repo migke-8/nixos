@@ -29,28 +29,14 @@ echo "- create timers"
 echo "- make a checklist"
 echo "- when learning: focus on only one thing"
 
-# source ''${./modules/dev.sh}
+source ${./modules/dev.sh}
+source ${./modules/completion.sh}
+source ${./modules/history.sh}
 
 # theme
 setopt PROMPT_SUBST
 local THEME_FILE="${./themes/theme.zsh}"
 [ -f "$THEME_FILE" ] && source $THEME_FILE || echo "theme with name \"$ZSH_THEME_NAME\" was not found\n"
-
-# auto completion
-autoload -U compinit; compinit
-_comp_options+=(globdots)
-zstyle ':completion:*' menu select
-zstyle ':completion:*' file-sort modification
-
-# history
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
-
-# Use [[ -n ]] to check if terminfo caps exist before binding
-[[ -n "''${terminfo[kcuu1]}" ]] && bindkey "''${terminfo[kcuu1]}" up-line-or-beginning-search
-[[ -n "''${terminfo[kcud1]}" ]] && bindkey "''${terminfo[kcud1]}" down-line-or-beginning-search
 '';
     shellAliases = {
       ll = "ls -l";
