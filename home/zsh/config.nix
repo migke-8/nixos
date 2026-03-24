@@ -23,20 +23,14 @@
     syntaxHighlighting.enable = true;
     autocd = true;
     initContent = ''
-# important !!!!!!!!!
-echo "before coding:"
-echo "- create timers"
-echo "- make a checklist"
-echo "- when learning: focus on only one thing"
-
-source ${./modules/dev.sh}
-source ${./modules/completion.sh}
-source ${./modules/history.sh}
-
-# theme
-setopt PROMPT_SUBST
-local THEME_FILE="${./themes/theme-0.zsh}"
-[ -f "$THEME_FILE" ] && source $THEME_FILE || echo "theme with name \"$ZSH_THEME_NAME\" was not found\n"
+      source ${./modules/reminder.sh}
+      source ${./modules/dev.sh}
+      source ${./modules/completion.sh}
+      source ${./modules/history.sh}
+      # theme
+      setopt PROMPT_SUBST
+      local THEME_FILE="${./themes/theme-0.zsh}"
+      [ -f "$THEME_FILE" ] && source $THEME_FILE || echo "theme with name \"$ZSH_THEME_NAME\" was not found\n"
 '';
     shellAliases = {
       ll = "ls -l";

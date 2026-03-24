@@ -32,10 +32,6 @@ handle_nix_enviroment() {
       set_state "$(pwd)" "in"
       exec nix develop -c "zsh" || echo "Failed to enter nix develop. Returning to previous shell."
     fi
-  else
-    if [[ -n "$NIX_SHELL" ]]; then
-      rm $STATE_FILE
-    fi
   fi
 }
 on_exit() {
