@@ -35,7 +35,7 @@ source ${./modules/history.sh}
 
 # theme
 setopt PROMPT_SUBST
-local THEME_FILE="${./themes/theme.zsh}"
+local THEME_FILE="${./themes/theme-0.zsh}"
 [ -f "$THEME_FILE" ] && source $THEME_FILE || echo "theme with name \"$ZSH_THEME_NAME\" was not found\n"
 '';
     shellAliases = {
