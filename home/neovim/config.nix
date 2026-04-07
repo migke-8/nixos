@@ -11,6 +11,7 @@
     defaultEditor = true;
     enable = true;
     plugins = with pkgs.vimPlugins; [
+      vim-mustache-handlebars
       monokai-pro-nvim
       none-ls-nvim
       telescope-nvim
@@ -21,12 +22,15 @@
       cmp_luasnip
       friendly-snippets
       luasnip
+      rustaceanvim
       oil-nvim
       nvim-metals
       lualine-nvim
       render-markdown-nvim
       nvim-lspconfig
       nvim-treesitter.withAllGrammars
+      nvim-dap
+      nvim-dap-ui
     ];
   };
 }

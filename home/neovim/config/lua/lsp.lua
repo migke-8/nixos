@@ -9,22 +9,58 @@ local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = t
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "scala", "sbt", "java" },
   callback = function()
-    require("metals").initialize_or_attach(capable(require("metals").bare_config()))
+    local config = capable(require("metals").bare_config())
+    local result = vim.tbl_deep_extend("keep", config, {
+      metalsBinaryPath = {"metals"}
+    })
+    require("metals").initialize_or_attach(result)
   end,
   group = nvim_metals_group,
 })
 vim.lsp.enable("nixd")
+vim.lsp.enable("bashls")
+vim.lsp.config("bashls", capable({}))
+
 vim.lsp.enable("svelte")
+vim.lsp.enable("svelte", capable({}))
 vim.lsp.enable("ts_ls")
+vim.lsp.config("ts_ls", capable({
+  settings = {
+    formatting = {
+      command = {"prettier"}
+    }
+  }
+}))
+
+vim.filetype.add({
+  extension = { ["html.mustache"] = "html" },
+})
+vim.lsp.config("html", {
+  filetypes = { "html", "html.mustache" },
+  settings = {
+    formatting = {
+      command = {"prettier"}
+
+    }
+  }
+})
 vim.lsp.enable("html")
 vim.lsp.enable("cssls")
+vim.lsp.config("cssls", capable({
+  settings = {
+    formatting = {
+      command = {"prettier"}
+    }
+  }
+}))
 vim.lsp.enable("lua_ls")
 vim.lsp.config("lua_ls",  capable({
-settings = {
-formatting = {
-command = {"stylua"}
-}
-}
+  cmd = {"lua-lsp"},
+  settings = {
+    formatting = {
+      command = {"stylua"}
+    }
+  }
 }))
 vim.lsp.config("nixd", capable({
   cmd = {"nixd"},

@@ -108,6 +108,8 @@ in {
         "XF86AudioRaiseVolume" = "exec pactl set-sink-volume @DEFAULT_SINK@ +5%";
         "XF86AudioLowerVolume" = "exec pactl set-sink-volume @DEFAULT_SINK@ -5%";
         "Print" = "exec grimshot savecopy area";
+        "${mod}+Shift+N"= "exec makoctl dismiss --all";
+        "${mod}+N"= "exec makoctl dismiss";
       };
 
       # Modes

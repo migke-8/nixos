@@ -1,4 +1,5 @@
 require("comp")
+require("dap")
 require("treesitter")
 require("lsp")
 require("line")

@@ -1,5 +1,7 @@
 {pkgs, ...}:
 with pkgs; [
+  libresprite
+  chromium
   polymc
   obs-studio
   pcsx2

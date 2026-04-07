@@ -152,7 +152,7 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 7d";
+    options = "--delete-older-than 3d";
   };
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

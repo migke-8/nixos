@@ -1,7 +1,4 @@
-{
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   home.username = "miguel";
   home.homeDirectory = "/home/miguel";
   home.stateVersion = "25.11";
@@ -16,9 +13,18 @@
     ./home/zsh/config.nix
   ];
 
-  home.packages = [
-    pkgs.rofi
-    pkgs.nerd-fonts.arimo
-    pkgs.nerd-fonts.mononoki
+  home.packages = with pkgs; [
+    # apps
+    rofi
+    # fonts
+    nerd-fonts.arimo
+    nerd-fonts.mononoki
+    # formatters
+    alejandra
+    stylua
+    # LSPs
+    nixd
+    bash-language-server
+    luajitPackages.lua-lsp
   ];
 }

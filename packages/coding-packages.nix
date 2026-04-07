@@ -17,14 +17,10 @@ in
     musl
     # Debuggers
     gdb
-    # formatters
-    # alejandra
-    # stylua
-    # prettier
-    # # LSPs
-    # nixd
-    # lemminx
-    # luajitPackages.lua-lsp
+    #databases
+    sqld
+    # editors
+    zed-editor
     # bash-language-server
     # nodePackages.vscode-langservers-extracted
     # typescript-language-server
