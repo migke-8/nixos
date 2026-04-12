@@ -11,6 +11,7 @@
     defaultEditor = true;
     enable = true;
     plugins = with pkgs.vimPlugins; [
+      telescope-nvim
       vim-mustache-handlebars
       monokai-pro-nvim
       none-ls-nvim
@@ -31,6 +32,8 @@
       nvim-treesitter.withAllGrammars
       nvim-dap
       nvim-dap-ui
+      crates-nvim
+      nvim-jdtls
     ];
   };
 }
