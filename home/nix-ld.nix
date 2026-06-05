@@ -8,5 +8,6 @@
   programs.nix-ld.libraries = with pkgs; [
     stdenv.cc.cc
     zlib
+    bloop
   ];
 }

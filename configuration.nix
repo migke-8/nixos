@@ -18,6 +18,8 @@
   boot.loader.systemd-boot.consoleMode = "max";
   boot.plymouth.logo = "${pkgs.nixos-icons}/share/icons/hicolor/128x128/apps/nix-snowflake.png";
   boot.kernelParams = [
+    "fsck.mode=force"
+    "fsck.repair=yes"
     "quiet"
     "splash"
     "intel_iommu=on"
@@ -89,11 +91,6 @@
     pulse.enable = true;
   };
   services.seatd.enable = true;
-
-  programs.java = {
-    enable = true;
-    package = pkgs.jdk21;
-  };
 
   programs.gnupg.agent = {
     enable = true;

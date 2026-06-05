@@ -10,12 +10,15 @@ local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = t
 
 local initiliaze_metals = function(metals) 
   if not metals_initialized then 
-    local config = capable(require("metals").bare_config())
+    local config = capable(metals.bare_config())
+    -- Aponta para o binário do Metals provido pelo Nix
     local result = vim.tbl_deep_extend("keep", config, {
-      metalsBinaryPath = {"metals"}
+      settings = {
+        useGlobalExecutable = true,
+      },
     })
     metals_initialized = true
-    require("metals").initialize_or_attach(result)
+    metals.initialize_or_attach(result)
   end
 end
 local initialize_jdtls = function(jdtls) 
@@ -40,8 +43,15 @@ local initialize_jdtls = function(jdtls)
   jdtls.start_or_attach(config)
 end
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "scala", "sbt" },
-  callback = initiliaze_metals,
+  pattern = { "scala", "sbt", "mill" },
+  callback = function()
+    local status, metals = pcall(require, "metals")
+    if status then
+      initiliaze_metals(metals)
+    else
+      print("Error: nvim-metals not found.")
+    end
+  end,
   group = nvim_metals_group,
 })
 local function prompt_java_lsp()
@@ -58,7 +68,7 @@ local function prompt_java_lsp()
       chosen_java_option = choice
     if choice == "jdtls" then
         local status, jdtls = pcall(require, "jdtls")
-      if status then
+        if status then
           initialize_jdtls(jdtls)
         else
           print("Error: nvim-jdtls not found.")
@@ -79,8 +89,6 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     if chosen_java_option == nil then
       prompt_java_lsp()
-    elseif chosen_java_option == "jdtls" then
-      require("jdtls").initialize_or_attach()
     end
   end,
 })
@@ -174,4 +182,3 @@ vim.keymap.set("n", "sdc", vim.lsp.buf.declaration, {})
 vim.keymap.set("n", "sdf", vim.lsp.buf.definition, {})
 vim.keymap.set("n", "sim", vim.lsp.buf.implementation, {})
 vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
-

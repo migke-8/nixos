@@ -35,5 +35,23 @@
       crates-nvim
       nvim-jdtls
     ];
+    extraPackages = with pkgs; [
+      java-language-server
+      metals
+      vscode-langservers-extracted
+      typescript-language-server
+      svelte-language-server
+      bash-language-server
+      clang-tools
+      # fmt
+      scalafmt
+      alejandra
+      stylua
+      prettier
+      # bsp
+      bloop
+      # cmd
+      ripgrep
+    ];
   };
 }
