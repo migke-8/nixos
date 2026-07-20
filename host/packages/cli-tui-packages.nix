@@ -14,4 +14,7 @@ in
     unzip
     clamav
     bat
+    man-pages
+    man-pages-posix
+    glibcInfo # Provides C standard library documentation
   ]

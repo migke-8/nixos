@@ -25,6 +25,7 @@ pkgs,
       source ${./modules/dev.sh}
       source ${./modules/completion.sh}
       source ${./modules/history.sh}
+      source ${./modules.swap}
       # theme
       setopt PROMPT_SUBST
       local THEME_FILE="${./themes/theme-0.zsh}"

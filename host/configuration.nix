@@ -1,16 +1,15 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{
-  pkgs,
-  # polymc,
-  lib,
-  ...
+{ pkgs
+, # polymc,
+  lib
+, ...
 }: {
   imports = [
     ./hardware-configuration.nix
-  ] ++ builtins.filter 
-    (path: lib.hasSuffix ".nix" (builtins.toString path)) 
+  ] ++ builtins.filter
+    (path: lib.hasSuffix ".nix" (builtins.toString path))
     (lib.fileset.toList ./modules);
 
 
@@ -50,6 +49,25 @@
       };
     };
   };
+  # services.clear-swap = {
+  #   enable = true;
+  #   settings = {
+  #     default_session = {
+  #       command = ''
+  #         SIZE=$(swapon --show | awk "{ if(NR == 2) print \$3 }")
+  #         SIZE=$${SIZE%?}
+  #         USED=$(swapon --show | awk "{ if(NR == 2) print \$4 }")
+  #         USED=$${USED%?}
+  #         if [[ $(( SIZE - USED > SIZE - SIZE / 2 )) ]]; then
+  #           echo "[WARNING]: FULL SWAP"
+  #           sudo swapoff -a
+  #           sudo swapon -a
+  #           echo "SWAP CLEARED"
+  #         fi
+  #       '';
+  #     };
+  #   };
+  # };
   services.xserver.xkb = {
     layout = "br";
     variant = "";
@@ -94,10 +112,10 @@
       "disk"
     ];
     packages =
-      import ./packages/packages.nix {inherit pkgs;}
-      ++ import ./packages/coding-packages.nix {inherit pkgs;}
-      ++ import ./packages/cli-tui-packages.nix {inherit pkgs;}
-      ++ import ./packages/rice-packages.nix {inherit pkgs;};
+      import ./packages/packages.nix { inherit pkgs; }
+      ++ import ./packages/coding-packages.nix { inherit pkgs; }
+      ++ import ./packages/cli-tui-packages.nix { inherit pkgs; }
+      ++ import ./packages/rice-packages.nix { inherit pkgs; };
     shell = pkgs.zsh;
   };
 
@@ -125,7 +143,7 @@
       OnCalendar = "*:0/15:00";
       Persistent = true;
     };
-    wantedBy = ["timers.target"];
+    wantedBy = [ "timers.target" ];
   };
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
@@ -143,10 +161,10 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.gamemode.enable = true;
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   system.stateVersion = "25.05"; # Did you read the comment?
   virtualisation.libvirtd.enable = true;
-  boot.kernelModules = ["kvm-amd" "kvm-intel"];
+  boot.kernelModules = [ "kvm-amd" "kvm-intel" ];
   # virtualisation.libvirtd.qemu = {
   #   package = pkgs.qemu_kvm;
   #   runAsRoot = true;
@@ -166,7 +184,24 @@
     stdenv.cc.cc
     zlib
   ];
+
+
+
+  # hardware
   services.udev.extraRules = ''
     KERNEL=="sda", SUBSYSTEM=="block", OWNER="root", GROUP="disk", MODE="0660"
   '';
+  hardware.enableAllFirmware = true;
+
+  services.thermald.enable = true;
+  services.tlp.enable = true;
+
+  # Firmware updates for Dell laptops via fwupd
+  services.fwupd.enable = true;
+
+  # Enable graphics support (nixos-hardware handles driver selection)
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true; # Needed for 32-bit apps/Steam if applicable
+  };
 }
