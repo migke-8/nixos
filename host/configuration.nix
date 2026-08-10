@@ -204,4 +204,6 @@
     enable = true;
     enable32Bit = true; # Needed for 32-bit apps/Steam if applicable
   };
+
+  services.tailscale.enable = false;
 }
