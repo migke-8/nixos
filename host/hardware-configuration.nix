@@ -9,25 +9,34 @@
     ];
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
+  boot.initrd.kernelModules = [ "dm-snapshot" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/9aba3dea-2ad3-4aa8-a10b-10669571db83";
+    { device = "/dev/mapper/vgubuntu-nixosroot";
+      fsType = "ext4";
+    };
+
+  fileSystems."/home" =
+    { device = "/dev/mapper/vgubuntu-nixoshome";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/1614-979A";
+    { device = "/dev/disk/by-uuid/B0D6-8CE9";
       fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
+      options = [ "fmask=0022" "dmask=0022" ];
     };
+	fileSystems."/mnt/ubuntu" = {
+	device = "/dev/mapper/vgubuntu-root";
+		fsType = "ext4";
+			options = [ "user" "defaults" ];
+};
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/6c2089a1-b2b4-44d6-b996-82e6f9a80a67"; }
+    [ { device = "/dev/mapper/vgubuntu-swap_1"; }
     ];
-
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction
@@ -37,9 +46,4 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  hardware.graphics.enable = true;
-
-
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
 }

@@ -1,13 +1,15 @@
-{...}: {
+{ pkgs, config, ... }: {
+
   programs.waybar = {
     enable = true;
+    package = config.lib.nixGL.wrap pkgs.waybar;
     systemd.enable = true;
     settings = [
       {
         "height" = 40;
         "spacing" = 0;
-        "modules-left" = ["sway/workspaces" "sway/mode"];
-        "modules-center" = ["group/center"];
+        "modules-left" = [ "sway/workspaces" "sway/mode" ];
+        "modules-center" = [ "group/center" ];
         "modules-right" = [
           "network"
           "clock"
@@ -31,11 +33,17 @@
             "custom/suspend"
             "custom/reboot"
             "custom/shutdown"
+            "custom/exit"
           ];
         };
         "custom/logo" = {
           "format" = "   ";
           "tooltip" = false;
+        };
+        "custom/exit" = {
+          "format" = "   ";
+          "tooltip" = false;
+          "on-click" = "swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'";
         };
         "custom/apps" = {
           "format" = "   ";
@@ -67,7 +75,7 @@
           "critical-threshold" = 80;
           "format-critical" = "{temperatureC}°C {icon}";
           "format" = "{temperatureC}°C {icon}";
-          "format-icons" = ["" "" ""];
+          "format-icons" = [ "" "" "" ];
           "hwmon-path-abs" = "/sys/devices/platform/coretemp.0/hwmon";
           "input-filename" = "temp2_input";
           "tooltip" = false;
@@ -91,7 +99,7 @@
           "format-full" = "{capacity}% {icon}";
           "format-charging" = "{capacity}%  {icon}";
           "format-plugged" = "{capacity}%  {icon}";
-          "format-icons" = ["" "" "" "" ""];
+          "format-icons" = [ "" "" "" "" "" ];
         };
         "pulseaudio" = {
           "scroll-step" = 1;
@@ -127,7 +135,8 @@
       #custom-apps,
       #custom-suspend,
       #custom-reboot,
-      #custom-shutdown {
+      #custom-shutdown,
+      #custom-exit {
         padding: 0.75rem 1rem;
         transition-property: background-color;
         transition-duration: 0.4s;
@@ -147,6 +156,10 @@
         background-size: 100%;
       }
 
+      #custom-exit {
+        background-image: url("${./images/exit.svg}");
+        background-size: 60%;
+      }
       #custom-apps {
         background-image: url("${./images/apps-svgrepo-com.svg}");
       }

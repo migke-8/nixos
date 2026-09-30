@@ -4,6 +4,7 @@
   ...
 }: {
   programs.foot = {
+    package = config.lib.nixGL.wrap pkgs.foot;
     enable = true;
     settings = {
       main = {

@@ -8,13 +8,18 @@ in
   ];
   programs.nixvim = {
     extraPackages = with pkgs; [
+      ripgrep
+      fd
+      tree-sitter
       metals
       coursier
       jdk21
       nodejs
-      java-language-server
+      jdt-language-server
     ];
     extraPlugins = with pkgs.vimPlugins; [
+      nvim-treesitter.withAllGrammars
+      nvim-jdtls
       nvim-metals
     ];
     nixpkgs.pkgs = pkgs;
@@ -51,6 +56,14 @@ in
       };
       dap = {
         enable = true;
+        adapters = {
+          executables = {
+            gdb = {
+              command = "${pkgs.gdb}/bin/gdb";
+              args = [ "-i" "dap" ];
+            };
+          };
+        };
       };
       luasnip = {
         enable = true;
@@ -59,6 +72,9 @@ in
         }];
       };
       cmp_luasnip.enable = true;
+      crates = {
+        enable = true;
+      };
       cmp = {
         autoEnableSources = true;
         enable = true;
@@ -69,12 +85,12 @@ in
             { name = "path"; }
             { name = "buffer"; }
           ];
-          window =  {
+          window = {
             col_offset = -3;
             completion = {
               border = "shadow";
               scrollbar = false;
-                  };
+            };
             documentation = { max_height = 7; };
           };
           mapping = {
@@ -84,18 +100,18 @@ in
             "<C-e>" = "cmp.mapping.abort()";
             "<Tab>" = "cmp.mapping.confirm({ select = true })";
             "<C-d>" = ''
-                cmp.mapping(function(fallback)
-                  if cmp.visible_docs() then
-                    cmp.close_docs()
-                    elseif cmp.visible() then
-                    cmp.open_docs()
-                  else
-                    fallback()
-                  end
-                end)
+              cmp.mapping(function(fallback)
+                if cmp.visible_docs() then
+                  cmp.close_docs()
+                  elseif cmp.visible() then
+                  cmp.open_docs()
+                else
+                  fallback()
+                end
+              end)
             '';
-    "<Down>" =" cmp.mapping.select_next_item()";
-    "<Up>" = "cmp.mapping.select_prev_item()";
+            "<Down>" = " cmp.mapping.select_next_item()";
+            "<Up>" = "cmp.mapping.select_prev_item()";
           };
         };
       };
@@ -130,22 +146,22 @@ in
           };
           view_options = {
             show_hidden = true;
-            is_hidden_file = nixvim.mkRaw ''
-                function(name, _)
-                  return vim.startswith(name, ".")
-                end,
-                case_insensitive = false,
-                  sort = {
-                    { "type", "asc" },
-                    { "name", "asc" },
-                  },
-                  is_always_hidden = function(name, _)
-                  if name == ".." or name == ".git" then
-                    return true
-                  end
-                  return false
+            is_hidden_file = config.lib.nixvim.mkRaw ''
+              function(name, _)
+                return vim.startswith(name, ".")
+              end,
+              case_insensitive = false,
+                sort = {
+                  { "type", "asc" },
+                  { "name", "asc" },
+                },
+                is_always_hidden = function(name, _)
+                if name == ".." or name == ".git" then
+                  return true
                 end
-                '';
+                return false
+              end
+            '';
           };
         };
       };
@@ -153,18 +169,22 @@ in
       treesitter = {
         enable = true;
         settings = {
+          ensure_installed = "all";
           highlight = {
             enable = true;
             additional_vim_regex_highlighting = false;
           };
-          indent = {
-            enable = true;
-          };
+          indentation.enable = true;
         };
       };
       lsp = {
         enable = true;
         servers = {
+          rust_analyzer = {
+            installCargo = true;
+            installRustc = true;
+            enable = true;
+          };
           clangd = {
             enable = true;
           };
@@ -184,7 +204,7 @@ in
       };
       mini = {
         enable = true;
-        modules.icons = {};
+        modules.icons = { };
       };
       render-markdown = {
         enable = true;
@@ -203,43 +223,147 @@ in
         };
       };
     };
-   keymaps = [
+    keymaps = [
+      # ── Debug ──────────────────────────────────────────────
+      {
+        mode = "n";
+        key = "<F5>";
+        action = "<cmd>DapContinue<CR>";
+        options.desc = "Debug: Continue";
+      }
+      {
+        mode = "n";
+        key = "<F10>";
+        action = "<cmd>DapStepOver<CR>";
+        options.desc = "Debug: Step over";
+      }
+      {
+        mode = "n";
+        key = "<F11>";
+        action = "<cmd>DapStepInto<CR>";
+        options.desc = "Debug: Step into";
+      }
+      {
+        mode = "n";
+        key = "<F12>";
+        action = "<cmd>DapStepOut<CR>";
+        options.desc = "Debug: Step out";
+      }
+
+      # ── Breakpoints ────────────────────────────────────────
+      {
+        mode = "n";
+        key = "<leader>db";
+        action = "<cmd>DapToggleBreakpoint<CR>";
+        options.desc = "Debug: Toggle breakpoint";
+      }
+      {
+        mode = "n";
+        key = "<leader>dB";
+        action = "<cmd>DapSetConditionalBreakpoint<CR>";
+        options.desc = "Debug: Conditional breakpoint";
+      }
+
+      # ── DAP UI ─────────────────────────────────────────────
       {
         mode = "n";
         key = "<leader>du";
-        action = "<cmd>lua require('dapui').toggle()<cr>";
-        options.desc = "Alternar o DAP UI";
+        action = "<cmd>lua require('dapui').toggle()<CR>";
+        options.desc = "Debug: Toggle UI";
+      }
+
+      # ── Debug session ──────────────────────────────────────
+      {
+        mode = "n";
+        key = "<leader>dr";
+        action = "<cmd>DapRestartFrame<CR>";
+        options.desc = "Debug: Restart frame";
+      }
+      {
+        mode = "n";
+        key = "<leader>dq";
+        action = "<cmd>DapTerminate<CR>";
+        options.desc = "Debug: Terminate";
+      }
+
+      # ── Evaluation ────────────────────────────────────────
+      {
+        mode = "n";
+        key = "<leader>de";
+        action = "<cmd>lua require('dapui').eval()<CR>";
+        options.desc = "Debug: Evaluate";
       }
     ];
-    
+
     # Abre automaticamente quando o dap inicia
     extraConfigLua = ''
-      -- **************
-      -- extra
-      -- **************
-      require("luasnip").filetype_extend("typescriptreact", { "html" })
-      require("luasnip").filetype_extend("javascriptreact", { "html" })
+            -- **************
+            -- extra
+            -- **************
+            require("luasnip").filetype_extend("typescriptreact", { "html" })
+            require("luasnip").filetype_extend("javascriptreact", { "html" })
 
-      local dap, dapui = require("dap"), require("dapui")
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close()
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close()
-      end
+            local dap, dapui = require("dap"), require("dapui")
+            dap.listeners.after.event_initialized["dapui_config"] = function()
+              dapui.open()
+            end
+            dap.listeners.before.event_terminated["dapui_config"] = function()
+              dapui.close()
+            end
+            dap.listeners.before.event_exited["dapui_config"] = function()
+              dapui.close()
+            end
 
-      local builtin = require('telescope.builtin')
-      vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
-      vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" })
-      vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
-      vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
+            local builtin = require('telescope.builtin')
+            vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
+            vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Telescope live grep" })
+            vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
+            vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
 
-      vim.keymap.set("n", "-", function()
-        require("oil").open()
-      end)
+            vim.keymap.set("n", "-", function()
+              require("oil").open()
+            end)
+
+         local cmp_nvim_lsp = require("cmp_nvim_lsp")
+         local capable = function(config) 
+           local capable = cmp_nvim_lsp.default_capabilities()
+           return vim.tbl_deep_extend("keep", config, capable)
+         end
+            function initialize_jdtls(jdtls)
+            local root_dir = jdtls.setup.find_root({'.git', 'build.gradle', 'mvnw', 'gradlew', "flake.nix"})
+            local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
+            local workspace_dir = vim.fn.stdpath("cache") .. "/jdtls-workspace/" .. project_name
+
+            local config = capable {
+              cmd = {
+                "${pkgs.jdt-language-server}/bin/jdtls",
+                "-configuration", vim.fn.stdpath("cache") .. "/jdtls-config",
+                "-data", workspace_dir
+              },
+              root_dir = root_dir,
+              settings = {
+                java = {
+                  signatureHelp = { enabled = true },
+                  contentProvider = { preferred = 'fernflower' },
+                },
+              },
+            }
+              jdtls.setup_dap({
+                hotcodereplace = "auto",
+              })
+              jdtls.start_or_attach(config)
+            end
+
+            vim.api.nvim_create_autocmd("FileType", {
+              pattern = "java",
+              callback = function()
+                local status, jdtls = pcall(require, "jdtls")
+               if status then
+                 initialize_jdtls(jdtls)
+               end
+             end,
+           })
+
 
       local metals_config = require("metals").bare_config()
       metals_config.settings = {
@@ -256,142 +380,136 @@ in
         map("<leader>mc", ":MetalsCompile<CR>", "Metals Compile")
       end
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "scala", "sbt", "java", "mill" },
+        pattern = { "scala", "sbt", "mill" },
         callback = function()
           require("metals").initialize_or_attach(metals_config)
         end,
         group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
       })
 
-      vim.keymap.set({ "n", "i" }, "<C-f>", vim.lsp.buf.format, {})
-      -- **************
-      -- editor config
-      -- **************
-      vim.cmd("set tabstop=2")
-      vim.cmd("set shiftwidth=2")
-      vim.cmd("set softtabstop=2")
-      vim.cmd("set expandtab")
-      vim.cmd("set ignorecase")
-      vim.cmd("set history=1000")
-      vim.cmd("set wildmenu")
-      vim.cmd("set relativenumber")
-      vim.cmd("set clipboard+=unnamedplus")
-      vim.cmd("set noswapfile")
-      vim.cmd("set cmdheight=2")
-      vim.opt.spell = true
-      vim.opt.spelllang = "en_us"
-      vim.opt.shell = "zsh"
-      vim.api.nvim_create_autocmd("FileType", {
-        callback = function()
-          pcall(vim.treesitter.start)
-          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            vim.keymap.set({ "n", "i" }, "<C-f>", vim.lsp.buf.format, {})
+            -- **************
+            -- editor config
+            -- **************
+            vim.cmd("set tabstop=2")
+            vim.cmd("set shiftwidth=2")
+            vim.cmd("set softtabstop=2")
+            vim.cmd("set expandtab")
+            vim.cmd("set ignorecase")
+            vim.cmd("set history=1000")
+            vim.cmd("set wildmenu")
+            vim.cmd("set relativenumber")
+            vim.cmd("set clipboard+=unnamedplus")
+            vim.cmd("set noswapfile")
+            vim.cmd("set cmdheight=2")
+            vim.opt.spell = true
+            vim.opt.spelllang = "en_us"
+            vim.opt.shell = "zsh"
+            -- **************
+            -- keymaps config
+            -- **************
+            local doKeyStroke = function(keys_to_type)
+              local replaced_keys = vim.api.nvim_replace_termcodes(keys_to_type, true, false, true)
+              vim.api.nvim_feedkeys(replaced_keys, 'm', false)
+            end
+            local string = require("string")
+            local augroup = vim.api.nvim_create_augroup("buffer_events", { clear = true })
+            local isTerm = function()
+              return vim.api.nvim_buf_get_option(0, "buftype") == "terminal"
+            end
+            local isInTermNormal = function()
+              local in_terminal = vim.v.mode ~= 't'
+              local is_terminal_buffer = vim.bo.buftype == 'terminal'
+              return in_terminal and is_terminal_buffer
+            end
+            vim.keymap.set("n", "<C-d>", "<C-d>zz", {noremap = true, silent = true})
+            vim.keymap.set("n", "<C-u>", "<C-u>zz", {noremap = true, silent = true})
+            vim.keymap.set("n", "n", "nzzzv", {noremap = true, silent = true})
+            vim.keymap.set("n", "N", "Nzzzv", {noremap = true, silent = true})
+            vim.keymap.set({"n", "t"}, "<C-]>", function() vim.cmd("rightbelow vnew") end, {noremap = true, silent = true})
+            vim.keymap.set({"n", "t"}, "<Esc>", "<Esc>", {noremap = true, silent = true})
+            vim.keymap.set({"n", "t"}, "<C-[>", function() vim.cmd("leftabove vnew") end, {noremap = true, silent = true})
+            vim.keymap.set({"n", "t"}, "<A-->", function() vim.cmd("rightbelow new") end, {noremap = true, silent = true})
+            vim.keymap.set({"n", "t"}, "<A-=>", function() vim.cmd("new") end, {noremap = true, silent = true})
+            vim.keymap.set("n", "<C-t>", function()
+              if not isTerm() then
+                vim.cmd("terminal")
+                vim.cmd("set nospell")
+              end
+              doKeyStroke("a")
+            end)
+            vim.keymap.set({"n", "t"}, "<leader>n", "<C-\\><C-n>", { noremap = true, silent = true })
+            vim.keymap.set("t", "<C-t>", "<leader>n")
+            vim.keymap.set({"n", "t"}, "<C-Tab>", function()
+              vim.cmd("bnext")
+              vim.api.nvim_create_autocmd("BufEnter", {
+                group = augroup,
+                callback = function()
+                  if isInTermNormal() then
+                    doKeyStroke("a")
+                  end
+                end,
+                pattern = "*",
+                once = true
+              })
+            end)
+            vim.keymap.set({"n", "t"}, "<S-Tab>", function()
+              vim.cmd("bp")
+              vim.api.nvim_create_autocmd("BufEnter", {
+                group = augroup,
+                callback = function()
+                  if isInTermNormal() then
+                    doKeyStroke("a")
+                  end
+                end,
+                pattern = "*",
+                once = true
+              })
+
+            end)
+            vim.keymap.set({"n", "t"}, "<leader>w", function()
+              if isTerm() then
+                doKeyStroke("<leader>n<C-w>")
+              else
+                doKeyStroke("<C-w>")
+                doKeyStroke(string.char(vim.fn.getchar()))
+                vim.api.nvim_create_autocmd("BufEnter", {
+                  group = augroup,
+                  callback = function()
+                    if isInTermNormal() then
+                      doKeyStroke("a")
+                    end
+                  end,
+                  pattern = "*",
+                  once = true
+                })
+              end
+            end)
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          client.server_capabilities.semanticTokensProvider = nil
         end,
       })
-      -- **************
-      -- keymaps config
-      -- **************
-      local doKeyStroke = function(keys_to_type)
-        local replaced_keys = vim.api.nvim_replace_termcodes(keys_to_type, true, false, true)
-        vim.api.nvim_feedkeys(replaced_keys, 'm', false)
-      end
-      local string = require("string")
-      local augroup = vim.api.nvim_create_augroup("buffer_events", { clear = true })
-      local isTerm = function()
-        return vim.api.nvim_buf_get_option(0, "buftype") == "terminal"
-      end
-      local isInTermNormal = function()
-        local in_terminal = vim.v.mode ~= 't'
-        local is_terminal_buffer = vim.bo.buftype == 'terminal'
-        return in_terminal and is_terminal_buffer
-      end
-      vim.keymap.set("n", "<C-d>", "<C-d>zz", {noremap = true, silent = true})
-      vim.keymap.set("n", "<C-u>", "<C-u>zz", {noremap = true, silent = true})
-      vim.keymap.set("n", "n", "nzzzv", {noremap = true, silent = true})
-      vim.keymap.set("n", "N", "Nzzzv", {noremap = true, silent = true})
-      vim.keymap.set({"n", "t"}, "<C-]>", function() vim.cmd("rightbelow vnew") end, {noremap = true, silent = true})
-      vim.keymap.set({"n", "t"}, "<Esc>", "<Esc>", {noremap = true, silent = true})
-      vim.keymap.set({"n", "t"}, "<C-[>", function() vim.cmd("leftabove vnew") end, {noremap = true, silent = true})
-      vim.keymap.set({"n", "t"}, "<A-->", function() vim.cmd("rightbelow new") end, {noremap = true, silent = true})
-      vim.keymap.set({"n", "t"}, "<A-=>", function() vim.cmd("new") end, {noremap = true, silent = true})
-      vim.keymap.set("n", "<C-t>", function()
-        if not isTerm() then
-          vim.cmd("terminal")
-          vim.cmd("set nospell")
-        end
-        doKeyStroke("a")
-      end)
-      vim.keymap.set({"n", "t"}, "<leader>n", "<C-\\><C-n>", { noremap = true, silent = true })
-      vim.keymap.set("t", "<C-t>", "<leader>n")
-      vim.keymap.set({"n", "t"}, "<C-Tab>", function()
-        vim.cmd("bnext")
-        vim.api.nvim_create_autocmd("BufEnter", {
-          group = augroup,
-          callback = function()
-            if isInTermNormal() then
-              doKeyStroke("a")
-            end
-          end,
-          pattern = "*",
-          once = true
-        })
-      end)
-      vim.keymap.set({"n", "t"}, "<S-Tab>", function()
-        vim.cmd("bp")
-        vim.api.nvim_create_autocmd("BufEnter", {
-          group = augroup,
-          callback = function()
-            if isInTermNormal() then
-              doKeyStroke("a")
-            end
-          end,
-          pattern = "*",
-          once = true
-        })
-
-      end)
-      vim.keymap.set({"n", "t"}, "<leader>w", function()
-        if isTerm() then
-          doKeyStroke("<leader>n<C-w>")
-        else
-          doKeyStroke("<C-w>")
-          doKeyStroke(string.char(vim.fn.getchar()))
-          vim.api.nvim_create_autocmd("BufEnter", {
-            group = augroup,
-            callback = function()
-              if isInTermNormal() then
-                doKeyStroke("a")
-              end
-            end,
-            pattern = "*",
-            once = true
-          })
-        end
-      end)
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(args)
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    client.server_capabilities.semanticTokensProvider = nil
-  end,
-})
-vim.diagnostic.config({
-  virtual_text = false,
-  signs = true,
-  underline = true,
-  severity_sort = true,
-})
+      vim.diagnostic.config({
+        virtual_text = false,
+        signs = true,
+        underline = true,
+        severity_sort = true,
+      })
 
 
-vim.keymap.set("n", "<C-x>", function()
-  vim.diagnostic.open_float(nil, { focus = false })
-end)
-vim.keymap.set("n", "H", vim.lsp.buf.hover, {})
-vim.keymap.set("n", "S", vim.lsp.buf.signature_help, {})
-vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
-vim.keymap.set("n", "sdc", vim.lsp.buf.declaration, {})
-vim.keymap.set("n", "sdf", vim.lsp.buf.definition, {})
-vim.keymap.set("n", "sim", vim.lsp.buf.implementation, {})
-vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
+      vim.keymap.set("n", "<C-x>", function()
+        vim.diagnostic.open_float(nil, { focus = false })
+      end)
+      vim.keymap.set("n", "H", vim.lsp.buf.hover, {})
+      vim.keymap.set("n", "S", vim.lsp.buf.signature_help, {})
+      vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
+      vim.keymap.set("n", "sdc", vim.lsp.buf.declaration, {})
+      vim.keymap.set("n", "sdf", vim.lsp.buf.definition, {})
+      vim.keymap.set("n", "sim", vim.lsp.buf.implementation, {})
+      vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
 
-      '';
+    '';
   };
 }

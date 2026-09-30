@@ -1,11 +1,10 @@
-{
-  config,
-  pkgs,
-  home,
-  ...
+{ config
+, pkgs
+, home
+, ...
 }: {
-  programs.rofi = {
-    enable = true;
-    theme = ./.config/config.rasi;
-  };
+  home.packages = with pkgs; [
+    rofi
+  ];
+  xdg.configFile."rofi/config.rasi".source = ./.config/config.rasi;
 }

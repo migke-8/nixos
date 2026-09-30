@@ -11,8 +11,6 @@
   ] ++ builtins.filter
     (path: lib.hasSuffix ".nix" (builtins.toString path))
     (lib.fileset.toList ./modules);
-
-
   # Set your time zone.
   time.timeZone = "America/Recife";
 
@@ -72,7 +70,13 @@
     layout = "br";
     variant = "";
   };
-  services.libinput.enable = true;
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      tapping = true;
+      naturalScrolling = false;
+    };
+  };
   console.keyMap = "br-abnt2";
 
   services.pulseaudio.enable = false;
@@ -162,7 +166,7 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   programs.gamemode.enable = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  system.stateVersion = "25.05"; # Did you read the comment?
+  system.stateVersion = "26.05"; # Did you read the comment?
   virtualisation.libvirtd.enable = true;
   boot.kernelModules = [ "kvm-amd" "kvm-intel" ];
   # virtualisation.libvirtd.qemu = {
@@ -185,9 +189,9 @@
     zlib
   ];
 
+  services.tailscale.enable = false;
 
-
-  # hardware
+# hardware
   services.udev.extraRules = ''
     KERNEL=="sda", SUBSYSTEM=="block", OWNER="root", GROUP="disk", MODE="0660"
   '';
@@ -196,14 +200,15 @@
   services.thermald.enable = true;
   services.tlp.enable = true;
 
-  # Firmware updates for Dell laptops via fwupd
+	  # Firmware updates for Dell laptops via fwupd
   services.fwupd.enable = true;
 
-  # Enable graphics support (nixos-hardware handles driver selection)
+	  # Enable graphics support (nixos-hardware handles driver selection)
   hardware.graphics = {
     enable = true;
     enable32Bit = true; # Needed for 32-bit apps/Steam if applicable
   };
 
-  services.tailscale.enable = false;
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
 }
