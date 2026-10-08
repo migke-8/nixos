@@ -11,6 +11,12 @@ in
     pkgs.mako
     pkgs.libnotify
   ];
+  xdg.portal.config.sway = {
+    "org.freedesktop.impl.portal.Screencast" = [ "wlr" ];
+    "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+    "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+    default = [ "gtk" ];
+  };
   wayland.windowManager.sway =
     let
       mod = "Mod4";
@@ -21,12 +27,6 @@ in
       term = "foot";
     in
     {
-      # xdg.portal.config.sway = {
-      #   "org.freedesktop.impl.portal.Screencast" = [ "wlr" ];
-      #   "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
-      #   "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
-      #   default = [ "gtk" ];
-      # };
       enable = true;
       config = {
         modifier = mod;
@@ -118,6 +118,7 @@ in
           "${mod}+Ctrl+${left}" = "exec ${./scripts/swapws.sh} Left";
           "${mod}+Ctrl+${right}" = "exec ${./scripts/swapws.sh} Right";
           "${mod}+Shift+t" = "exec ${./scripts/toggleidle.sh}";
+          "${mod}+Shift+e" = "exit";
 
           "XF86AudioMute" = "exec pactl set-sink-mute @DEFAULT_SINK@ toggle";
           "XF86AudioRaiseVolume" = "exec pactl set-sink-volume @DEFAULT_SINK@ +5%";

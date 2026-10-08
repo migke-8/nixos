@@ -1,11 +1,14 @@
-{pkgs, ...}:
+{ pkgs, ... }:
 with pkgs; [
+  kicad-small
+  rclone
+  kdePackages.discover
+  ppsspp-sdl-wayland
+  libinput
   libresprite
   chromium
   obs-studio
   pcsx2
-  retroarch
-  libretro.swanstation
   gtk3
   glib
   gsettings-desktop-schemas

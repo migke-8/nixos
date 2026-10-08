@@ -10,13 +10,16 @@
       url = "github:nix-community/nixvim";
     };
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
+    jdtls = {
+      url = "github:migke-8/jdtls";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
     inputs@{ nixpkgs
     , home-manager
-    , nixvim,
-    nixos-hardware
+    , nixos-hardware
     , ...
     }: {
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {

@@ -2,8 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 { pkgs
-, # polymc,
-  lib
+, lib
 , ...
 }: {
   imports = [
@@ -47,35 +46,9 @@
       };
     };
   };
-  # services.clear-swap = {
-  #   enable = true;
-  #   settings = {
-  #     default_session = {
-  #       command = ''
-  #         SIZE=$(swapon --show | awk "{ if(NR == 2) print \$3 }")
-  #         SIZE=$${SIZE%?}
-  #         USED=$(swapon --show | awk "{ if(NR == 2) print \$4 }")
-  #         USED=$${USED%?}
-  #         if [[ $(( SIZE - USED > SIZE - SIZE / 2 )) ]]; then
-  #           echo "[WARNING]: FULL SWAP"
-  #           sudo swapoff -a
-  #           sudo swapon -a
-  #           echo "SWAP CLEARED"
-  #         fi
-  #       '';
-  #     };
-  #   };
-  # };
   services.xserver.xkb = {
     layout = "br";
     variant = "";
-  };
-  services.libinput = {
-    enable = true;
-    touchpad = {
-      tapping = true;
-      naturalScrolling = false;
-    };
   };
   console.keyMap = "br-abnt2";
 
@@ -88,23 +61,32 @@
     pulse.enable = true;
     jack.enable = true;
   };
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      tapping = true;
+      naturalScrolling = false;
+      disableWhileTyping = false;
+    };
+  };
   services.seatd.enable = true;
 
-  programs.gnupg.agent = {
-    enable = true;
-    pinentryPackage = pkgs.pinentry-curses;
-    enableSSHSupport = true;
+  programs = {
+    gnupg.agent = {
+      enable = true;
+      pinentryPackage = pkgs.pinentry-curses;
+      enableSSHSupport = true;
+    };
+    sway.enable = true;
+    chromium.enable = true;
+    zsh.enable = true;
+    nix-ld.enable = true;
+    nix-ld.libraries = with pkgs; [
+      stdenv.cc.cc
+      zlib
+    ];
   };
-  programs.sway.enable = true;
-  programs.chromium.enable = true;
 
-  programs.zsh.enable = true;
-
-  nixpkgs.overlays = [
-    # polymc.overlay
-  ];
-
-  # users setup
   users.users.miguel = {
     isNormalUser = true;
     description = "Miguel Peixoto Portela Bispo";
@@ -183,32 +165,23 @@
   };
   programs.virt-manager.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
-  programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [
-    stdenv.cc.cc
-    zlib
-  ];
 
   services.tailscale.enable = false;
 
-# hardware
+  # --------HARDWARE--------------
   services.udev.extraRules = ''
     KERNEL=="sda", SUBSYSTEM=="block", OWNER="root", GROUP="disk", MODE="0660"
   '';
-  hardware.enableAllFirmware = true;
-
   services.thermald.enable = true;
   services.tlp.enable = true;
-
-	  # Firmware updates for Dell laptops via fwupd
   services.fwupd.enable = true;
-
-	  # Enable graphics support (nixos-hardware handles driver selection)
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true; # Needed for 32-bit apps/Steam if applicable
+  hardware = {
+    enableAllFirmware = true;
+    bluetooth.enable = true;
+    bluetooth.powerOnBoot = true;
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
   };
-
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
 }

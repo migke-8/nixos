@@ -12,9 +12,7 @@
       SAVEHIST = 1000000000;
       ZSH_THEME_NAME = "theme";
       PATH =
-        "$HOME/.nix-profile/bin"
-        + ":$JAVA_HOME/bin"
-        + ":$HOME/.local/bin"
+        "$JAVA_HOME/bin"
         + ":$HOME/bin"
         + ":$HOME/bin/custom-scripts"
         + ":$PATH";
@@ -28,11 +26,9 @@
         local PATH="$(jbang edit -b --open=nvim $HOME/dev/$1)"
         cd "$PATH"
       }
-      # source ${./modules/dev.sh}
+      source ${./modules/dev.sh}
       source ${./modules/completion.sh}
       source ${./modules/history.sh}
-      ln -srf $HOME/.nix-profile/share/applications/* $HOME/.local/share/applications
-      ln -srf $HOME/.nix-profile/share/icons/* $HOME/.local/share/icons
       # theme
       setopt PROMPT_SUBST
       local THEME_FILE="${./themes/theme-0.zsh}"

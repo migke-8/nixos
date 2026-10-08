@@ -1,8 +1,8 @@
-{ inputs, pkgs, config, ... }: 
+{ inputs, pkgs, config, ... }:
 let
   inherit (config.lib) nixvim;
 in
-  {
+{
   imports = [
     inputs.nixvim.homeModules.nixvim
   ];
@@ -15,7 +15,6 @@ in
       coursier
       jdk21
       nodejs
-      jdt-language-server
     ];
     extraPlugins = with pkgs.vimPlugins; [
       nvim-treesitter.withAllGrammars
@@ -180,6 +179,10 @@ in
       lsp = {
         enable = true;
         servers = {
+          jdtls = {
+            enable = true;
+            package = inputs.jdtls.packages.${pkgs.system}.default;
+          };
           rust_analyzer = {
             installCargo = true;
             installRustc = true;
@@ -295,7 +298,6 @@ in
       }
     ];
 
-    # Abre automaticamente quando o dap inicia
     extraConfigLua = ''
             -- **************
             -- extra
@@ -354,15 +356,15 @@ in
               jdtls.start_or_attach(config)
             end
 
-            vim.api.nvim_create_autocmd("FileType", {
-              pattern = "java",
-              callback = function()
-                local status, jdtls = pcall(require, "jdtls")
-               if status then
-                 initialize_jdtls(jdtls)
-               end
-             end,
-           })
+           --  vim.api.nvim_create_autocmd("FileType", {
+           --    pattern = "java",
+           --    callback = function()
+           --      local status, jdtls = pcall(require, "jdtls")
+           --     if status then
+           --       initialize_jdtls(jdtls)
+           --     end
+           --   end,
+           -- })
 
 
       local metals_config = require("metals").bare_config()
@@ -511,5 +513,11 @@ in
       vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
 
     '';
+    extraFiles = {
+      "lua/jbang.lua".source = ./nvim/lua/jbang.lua;
+      "plugin/jbang.lua".text = ''
+        require("jbang")
+      '';
+    };
   };
 }
