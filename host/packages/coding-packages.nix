@@ -1,4 +1,4 @@
-{pkgs}: let
+{inputs, pkgs}: let
 in
   with pkgs; [
     # Build tools
@@ -18,4 +18,6 @@ in
     gdb
     #databases
     sqld
+  ] ++ [
+    inputs.jdtls.packages.${pkgs.system}.default
   ]

@@ -63,11 +63,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791497318,
-        "narHash": "sha256-xgHZ8XG1QS+ZTQcQk19+ct+SPlT1PSQPZUKsg5nX4Zs=",
+        "lastModified": 1791505874,
+        "narHash": "sha256-b2FAsAekt+RrlOG5tcNgCV76TTZl3zSlCkkzxB9Tfsw=",
         "owner": "migke-8",
         "repo": "jdtls",
-        "rev": "1dec52fd1ad1b1490d7ca30597f7520b90ba9759",
+        "rev": "3b805c78ddc897834212ea052f05cff44215824d",
         "type": "github"
       },
       "original": {

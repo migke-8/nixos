@@ -1,8 +1,4 @@
-{ inputs, pkgs, config, ... }:
-let
-  inherit (config.lib) nixvim;
-in
-{
+{ inputs, pkgs, config, ... }: {
   imports = [
     inputs.nixvim.homeModules.nixvim
   ];
@@ -179,10 +175,6 @@ in
       lsp = {
         enable = true;
         servers = {
-          jdtls = {
-            enable = true;
-            package = inputs.jdtls.packages.${pkgs.system}.default;
-          };
           rust_analyzer = {
             installCargo = true;
             installRustc = true;
@@ -307,13 +299,13 @@ in
 
             local dap, dapui = require("dap"), require("dapui")
             dap.listeners.after.event_initialized["dapui_config"] = function()
-              dapui.open()
+            dapui.open()
             end
             dap.listeners.before.event_terminated["dapui_config"] = function()
-              dapui.close()
+            dapui.close()
             end
             dap.listeners.before.event_exited["dapui_config"] = function()
-              dapui.close()
+            dapui.close()
             end
 
             local builtin = require('telescope.builtin')
@@ -323,71 +315,115 @@ in
             vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
 
             vim.keymap.set("n", "-", function()
-              require("oil").open()
+            require("oil").open()
             end)
 
-         local cmp_nvim_lsp = require("cmp_nvim_lsp")
-         local capable = function(config) 
-           local capable = cmp_nvim_lsp.default_capabilities()
-           return vim.tbl_deep_extend("keep", config, capable)
-         end
-            function initialize_jdtls(jdtls)
-            local root_dir = jdtls.setup.find_root({'.git', 'build.gradle', 'mvnw', 'gradlew', "flake.nix"})
-            local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
-            local workspace_dir = vim.fn.stdpath("cache") .. "/jdtls-workspace/" .. project_name
-
-            local config = capable {
-              cmd = {
-                "${pkgs.jdt-language-server}/bin/jdtls",
-                "-configuration", vim.fn.stdpath("cache") .. "/jdtls-config",
-                "-data", workspace_dir
-              },
-              root_dir = root_dir,
-              settings = {
-                java = {
-                  signatureHelp = { enabled = true },
-                  contentProvider = { preferred = 'fernflower' },
-                },
-              },
-            }
-              jdtls.setup_dap({
-                hotcodereplace = "auto",
-              })
-              jdtls.start_or_attach(config)
+            local cmp_nvim_lsp = require("cmp_nvim_lsp")
+            local capable = function(config) 
+            local capable = cmp_nvim_lsp.default_capabilities()
+            return vim.tbl_deep_extend("keep", config, capable)
             end
+local initialize_jdtls = function(jdtls)
+    local jdtls_path = vim.fn.resolve(vim.fn.exepath("jdtls"))
+    assert(jdtls_path ~= "", "jdtls executable not found on PATH")
 
-           --  vim.api.nvim_create_autocmd("FileType", {
-           --    pattern = "java",
-           --    callback = function()
-           --      local status, jdtls = pcall(require, "jdtls")
-           --     if status then
-           --       initialize_jdtls(jdtls)
-           --     end
-           --   end,
-           -- })
+    local package_root = vim.fn.fnamemodify(jdtls_path, ":h:h")
+    local plugin_dir = package_root .. "/share/java/jdtls/plugins"
 
+    local bundles = vim.fn.glob(
+        plugin_dir .. "/dev.jbang.eclipse.*.jar",
+        false,
+        true
+    )
 
-      local metals_config = require("metals").bare_config()
-      metals_config.settings = {
-        showImplicitArguments = true,
-        showInferredType = true,
-        useGlobalExecutable = true
-      }
-      metals_config.on_attach = function(client, bufnr)
-        require("metals").setup_dap()
-        local map = function(lhs, rhs, desc)
-          vim.keymap.set("n", lhs, rhs, { buffer = bufnr, desc = desc })
-        end
-        map("<leader>ws", require("metals").hover_worksheet, "Hover Worksheet")
-        map("<leader>mc", ":MetalsCompile<CR>", "Metals Compile")
-      end
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "scala", "sbt", "mill" },
-        callback = function()
-          require("metals").initialize_or_attach(metals_config)
-        end,
-        group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
-      })
+    vim.notify("Using JDTLS: " .. jdtls_path)
+    vim.notify("JBang bundles:\n" .. table.concat(bundles, "\n"))
+
+    local root_markers = {
+        "pom.xml",
+        "build.gradle",
+        "build.gradle.kts",
+        "mvnw",
+        "gradlew",
+        ".git",
+        "flake.nix",
+    }
+
+    local root_dir = require("jdtls.setup").find_root(root_markers)
+    if not root_dir then
+        root_dir = vim.fn.getcwd()
+    end
+
+    local project_name = vim.fn.fnamemodify(root_dir, ":p:h:t")
+        .. "-"
+        .. vim.fn.fnamemodify(root_dir, ":t")
+
+    local workspace_dir = vim.fn.stdpath("cache")
+        .. "/jdtls-workspace/"
+        .. project_name
+
+    local config = {
+        cmd = {
+            jdtls_path,
+            "-configuration",
+            vim.fn.stdpath("cache") .. "/jdtls-config",
+            "-data",
+            workspace_dir,
+        },
+        root_dir = root_dir,
+        init_options = {
+            bundles = bundles,
+        },
+        settings = {
+            java = {
+                signatureHelp = {
+                    enabled = true,
+                },
+                contentProvider = {
+                    preferred = "fernflower",
+                },
+            },
+        },
+    }
+
+    jdtls.start_or_attach(config)
+end
+            vim.api.nvim_create_autocmd("FileType", {
+            pattern = "java",
+            callback = function()
+            local ok, jdtls = pcall(require, "jdtls")
+            if ok then
+            initialize_jdtls(jdtls)
+            else
+            vim.notify(
+            "Could not load nvim-jdtls",
+            vim.log.levels.ERROR
+            )
+            end
+            end,
+            })
+
+            local metals_config = require("metals").bare_config()
+            metals_config.settings = {
+            showImplicitArguments = true,
+            showInferredType = true,
+            useGlobalExecutable = true
+            }
+            metals_config.on_attach = function(client, bufnr)
+            require("metals").setup_dap()
+            local map = function(lhs, rhs, desc)
+            vim.keymap.set("n", lhs, rhs, { buffer = bufnr, desc = desc })
+            end
+            map("<leader>ws", require("metals").hover_worksheet, "Hover Worksheet")
+            map("<leader>mc", ":MetalsCompile<CR>", "Metals Compile")
+            end
+            vim.api.nvim_create_autocmd("FileType", {
+            pattern = { "scala", "sbt", "mill" },
+            callback = function()
+            require("metals").initialize_or_attach(metals_config)
+            end,
+            group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
+            })
 
             vim.keymap.set({ "n", "i" }, "<C-f>", vim.lsp.buf.format, {})
             -- **************
@@ -411,18 +447,18 @@ in
             -- keymaps config
             -- **************
             local doKeyStroke = function(keys_to_type)
-              local replaced_keys = vim.api.nvim_replace_termcodes(keys_to_type, true, false, true)
-              vim.api.nvim_feedkeys(replaced_keys, 'm', false)
+            local replaced_keys = vim.api.nvim_replace_termcodes(keys_to_type, true, false, true)
+            vim.api.nvim_feedkeys(replaced_keys, 'm', false)
             end
             local string = require("string")
             local augroup = vim.api.nvim_create_augroup("buffer_events", { clear = true })
             local isTerm = function()
-              return vim.api.nvim_buf_get_option(0, "buftype") == "terminal"
+            return vim.api.nvim_buf_get_option(0, "buftype") == "terminal"
             end
             local isInTermNormal = function()
-              local in_terminal = vim.v.mode ~= 't'
-              local is_terminal_buffer = vim.bo.buftype == 'terminal'
-              return in_terminal and is_terminal_buffer
+            local in_terminal = vim.v.mode ~= 't'
+            local is_terminal_buffer = vim.bo.buftype == 'terminal'
+            return in_terminal and is_terminal_buffer
             end
             vim.keymap.set("n", "<C-d>", "<C-d>zz", {noremap = true, silent = true})
             vim.keymap.set("n", "<C-u>", "<C-u>zz", {noremap = true, silent = true})
@@ -434,90 +470,85 @@ in
             vim.keymap.set({"n", "t"}, "<A-->", function() vim.cmd("rightbelow new") end, {noremap = true, silent = true})
             vim.keymap.set({"n", "t"}, "<A-=>", function() vim.cmd("new") end, {noremap = true, silent = true})
             vim.keymap.set("n", "<C-t>", function()
-              if not isTerm() then
-                vim.cmd("terminal")
-                vim.cmd("set nospell")
-              end
-              doKeyStroke("a")
+            if not isTerm() then
+            vim.cmd("terminal")
+            vim.cmd("set nospell")
+            end
+            doKeyStroke("a")
             end)
             vim.keymap.set({"n", "t"}, "<leader>n", "<C-\\><C-n>", { noremap = true, silent = true })
             vim.keymap.set("t", "<C-t>", "<leader>n")
             vim.keymap.set({"n", "t"}, "<C-Tab>", function()
-              vim.cmd("bnext")
-              vim.api.nvim_create_autocmd("BufEnter", {
-                group = augroup,
-                callback = function()
-                  if isInTermNormal() then
-                    doKeyStroke("a")
-                  end
-                end,
-                pattern = "*",
-                once = true
-              })
+            vim.cmd("bnext")
+            vim.api.nvim_create_autocmd("BufEnter", {
+            group = augroup,
+            callback = function()
+            if isInTermNormal() then
+            doKeyStroke("a")
+            end
+            end,
+            pattern = "*",
+            once = true
+            })
             end)
             vim.keymap.set({"n", "t"}, "<S-Tab>", function()
-              vim.cmd("bp")
-              vim.api.nvim_create_autocmd("BufEnter", {
-                group = augroup,
-                callback = function()
-                  if isInTermNormal() then
-                    doKeyStroke("a")
-                  end
-                end,
-                pattern = "*",
-                once = true
-              })
+            vim.cmd("bp")
+            vim.api.nvim_create_autocmd("BufEnter", {
+            group = augroup,
+            callback = function()
+            if isInTermNormal() then
+            doKeyStroke("a")
+            end
+            end,
+            pattern = "*",
+            once = true
+            })
 
             end)
             vim.keymap.set({"n", "t"}, "<leader>w", function()
-              if isTerm() then
-                doKeyStroke("<leader>n<C-w>")
-              else
-                doKeyStroke("<C-w>")
-                doKeyStroke(string.char(vim.fn.getchar()))
-                vim.api.nvim_create_autocmd("BufEnter", {
-                  group = augroup,
-                  callback = function()
-                    if isInTermNormal() then
-                      doKeyStroke("a")
-                    end
-                  end,
-                  pattern = "*",
-                  once = true
-                })
-              end
+            if isTerm() then
+            doKeyStroke("<leader>n<C-w>")
+            else
+            doKeyStroke("<C-w>")
+            doKeyStroke(string.char(vim.fn.getchar()))
+            vim.api.nvim_create_autocmd("BufEnter", {
+            group = augroup,
+            callback = function()
+            if isInTermNormal() then
+            doKeyStroke("a")
+            end
+            end,
+            pattern = "*",
+            once = true
+            })
+            end
             end)
-      vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          client.server_capabilities.semanticTokensProvider = nil
-        end,
-      })
-      vim.diagnostic.config({
-        virtual_text = false,
-        signs = true,
-        underline = true,
-        severity_sort = true,
-      })
+            vim.api.nvim_create_autocmd("LspAttach", {
+            callback = function(args)
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
+            client.server_capabilities.semanticTokensProvider = nil
+            end,
+            })
+            vim.diagnostic.config({
+            virtual_text = false,
+            signs = true,
+            underline = true,
+            severity_sort = true,
+            })
 
 
-      vim.keymap.set("n", "<C-x>", function()
-        vim.diagnostic.open_float(nil, { focus = false })
-      end)
-      vim.keymap.set("n", "H", vim.lsp.buf.hover, {})
-      vim.keymap.set("n", "S", vim.lsp.buf.signature_help, {})
-      vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
-      vim.keymap.set("n", "sdc", vim.lsp.buf.declaration, {})
-      vim.keymap.set("n", "sdf", vim.lsp.buf.definition, {})
-      vim.keymap.set("n", "sim", vim.lsp.buf.implementation, {})
-      vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
+            vim.keymap.set("n", "<C-x>", function()
+            vim.diagnostic.open_float(nil, { focus = false })
+            end)
+            vim.keymap.set("n", "H", vim.lsp.buf.hover, {})
+            vim.keymap.set("n", "S", vim.lsp.buf.signature_help, {})
+            vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
+            vim.keymap.set("n", "sdc", vim.lsp.buf.declaration, {})
+            vim.keymap.set("n", "sdf", vim.lsp.buf.definition, {})
+            vim.keymap.set("n", "sim", vim.lsp.buf.implementation, {})
+            vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
 
     '';
-    extraFiles = {
-      "lua/jbang.lua".source = ./nvim/lua/jbang.lua;
-      "plugin/jbang.lua".text = ''
-        require("jbang")
-      '';
-    };
+    extraFiles = { "lua/".source = ./nvim/lua; };
   };
 }

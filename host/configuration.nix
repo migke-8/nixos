@@ -3,6 +3,7 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 { pkgs
 , lib
+, inputs
 , ...
 }: {
   imports = [
@@ -99,7 +100,7 @@
     ];
     packages =
       import ./packages/packages.nix { inherit pkgs; }
-      ++ import ./packages/coding-packages.nix { inherit pkgs; }
+      ++ import ./packages/coding-packages.nix { inherit pkgs; inherit inputs; }
       ++ import ./packages/cli-tui-packages.nix { inherit pkgs; }
       ++ import ./packages/rice-packages.nix { inherit pkgs; };
     shell = pkgs.zsh;
