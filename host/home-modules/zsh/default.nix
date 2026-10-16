@@ -26,7 +26,7 @@
         local PATH="$(jbang edit -b --open=nvim $HOME/dev/$1)"
         cd "$PATH"
       }
-      source ${./modules/dev.sh}
+      # source ${./modules/dev.sh}
       source ${./modules/completion.sh}
       source ${./modules/history.sh}
       # theme
