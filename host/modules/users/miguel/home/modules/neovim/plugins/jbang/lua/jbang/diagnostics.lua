@@ -167,7 +167,7 @@ function M.setup()
 
   vim.api.nvim_create_autocmd("FileType", {
     group = group,
-    pattern = { "java", "kotlin", "groovy" },
+    pattern = { "java" },
     callback = function(ev)
       local buf = ev.buf
 

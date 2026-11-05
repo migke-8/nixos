@@ -1,7 +1,12 @@
-{ inputs, pkgs, config, ... }: {
-  imports = [
-    inputs.nixvim.homeModules.nixvim
-  ];
+{ inputs, pkgs, config, ... }:
+let
+  jbang-nvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "my-plugin";
+    version = "0.1.0";
+    src = ./plugins/jbang;
+  };
+in
+{
   programs.nixvim = {
     extraPackages = with pkgs; [
       ripgrep
@@ -14,9 +19,11 @@
       kotlin-language-server
     ];
     extraPlugins = with pkgs.vimPlugins; [
+      jbang-nvim
       nvim-treesitter.withAllGrammars
       nvim-jdtls
       nvim-metals
+      rustaceanvim
     ];
     nixpkgs.pkgs = pkgs;
     enable = true;
@@ -298,6 +305,8 @@
                   -- **************
                   -- extra
                   -- **************
+                  require("jbang").setup()
+
                   require("luasnip").filetype_extend("typescriptreact", { "html" })
                   require("luasnip").filetype_extend("javascriptreact", { "html" })
 
@@ -563,9 +572,5 @@
                   vim.keymap.set("n", "rnm", vim.lsp.buf.rename, {})
 
     '';
-    extraFiles = {
-      "lua/".source = ./nvim/lua;
-      "plugins/".source = ./nvim/plugins;
-    };
   };
 }

@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+sudo swapoff -a
+sudo swapon -a
+systemctl hibernate

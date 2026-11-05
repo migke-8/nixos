@@ -49,7 +49,8 @@ function M.synchronize()
     vim.notify("JBang synchronization requested")
   end, bufnr)
 end
-
-vim.api.nvim_create_user_command("JbangSync", M.synchronize, {})
+function M.setup()
+  vim.api.nvim_create_user_command("JbangSync", M.synchronize, {})
+end
 
 return M

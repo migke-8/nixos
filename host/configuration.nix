@@ -1,20 +1,69 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-{ pkgs
-, lib
-, inputs
-, ...
-}: {
-  imports = [
-    ./hardware-configuration.nix
-  ] ++ builtins.filter
-    (path: lib.hasSuffix ".nix" (builtins.toString path))
-    (lib.fileset.toList ./modules);
-  # Set your time zone.
-  time.timeZone = "America/Recife";
+args@{ inputs, pkgs, lib, ... }:
+let
+  usersPath = ./modules/users;
+  getFolders = path:
+    let
+      entries = builtins.readDir path;
+    in
+    builtins.attrNames (
+      lib.filterAttrs
+        (_: type: type == "directory")
+        entries
+    );
+  userFolders = getFolders usersPath;
 
-  # Select internationalisation properties.
+  getUserFile = fileName: args:
+    builtins.listToAttrs (
+      map
+        (folder: {
+          name = folder;
+          value =
+            if args != null then
+              import (usersPath + "/${folder}/${fileName}") args
+            else
+              import (usersPath + "/${folder}/${fileName}");
+        })
+        userFolders
+    );
+
+  sysUsers = getUserFile "user.nix" args;
+  houses = getUserFile "home/user-home.nix" null;
+  systemModules = builtins.filter
+    (path:
+      lib.hasSuffix "default.nix" (builtins.toString path)
+      && !(lib.hasInfix "/users/" (builtins.toString path))
+    )
+    (lib.fileset.toList ./modules);
+in
+{
+  imports = [ ./hardware-configuration.nix ] ++ systemModules;
+
+  # NixOS users
+  users.users = sysUsers;
+
+  # Home Manager
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = {
+      inherit inputs;
+    };
+    sharedModules = [
+      inputs.nixvim.homeModules.nixvim
+    ];
+    users = houses;
+  };
+
+  # Nix
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
+  nixpkgs.config.allowUnfree = true;
+
+  # Localization
+  time.timeZone = "America/Recife";
   i18n.defaultLocale = "pt_BR.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -29,160 +78,18 @@
     LC_TIME = "pt_BR.UTF-8";
   };
 
-  # Enable the X11 windowing system.
+  # Desktop
   services.xserver.enable = true;
-
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
-  };
-
-  # Enable the TUI display manager
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd sway";
-        user = "greeter";
-      };
-    };
-  };
   services.xserver.xkb = {
     layout = "br";
     variant = "";
   };
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-wlr
+      pkgs.xdg-desktop-portal-gtk
+    ];
+  };
   console.keyMap = "br-abnt2";
-
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-  services.libinput = {
-    enable = true;
-    touchpad = {
-      tapping = true;
-      naturalScrolling = false;
-      disableWhileTyping = false;
-    };
-  };
-  services.seatd.enable = true;
-
-  programs = {
-    gnupg.agent = {
-      enable = true;
-      pinentryPackage = pkgs.pinentry-curses;
-      enableSSHSupport = true;
-    };
-    sway.enable = true;
-    chromium.enable = true;
-    zsh.enable = true;
-    nix-ld.enable = true;
-    nix-ld.libraries = with pkgs; [
-      stdenv.cc.cc
-      zlib
-    ];
-  };
-
-  users.users.miguel = {
-    isNormalUser = true;
-    description = "Miguel Peixoto Portela Bispo";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-      "libvirtd"
-      "kvm"
-      "disk"
-    ];
-    packages =
-      import ./packages/packages.nix { inherit pkgs; }
-      ++ import ./packages/coding-packages.nix { inherit pkgs; inherit inputs; }
-      ++ import ./packages/cli-tui-packages.nix { inherit pkgs; }
-      ++ import ./packages/rice-packages.nix { inherit pkgs; };
-    shell = pkgs.zsh;
-  };
-
-  # Install firefox.
-  programs.firefox.enable = true;
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # 1. Define the systemd service for reminder
-  systemd.user.services.reminder-timer = {
-    description = "Send a notification reminder";
-    serviceConfig = {
-      Type = "oneshot";
-      # ${pkgs.libnotify}/bin/notify-send ensures the tool is available
-      # even if it's not installed system-wide.
-      ExecStart = "${pkgs.libnotify}/bin/notify-send 'Drink water!' 'Just remembering...' -i alarm-clock";
-    };
-  };
-
-  # 2. Define the timer (The 'Cron' part)
-  systemd.user.timers.reminder-timer = {
-    description = "Run the reminder for drinking water";
-    timerConfig = {
-      OnCalendar = "*:0/15:00";
-      Persistent = true;
-    };
-    wantedBy = [ "timers.target" ];
-  };
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 3d";
-  };
-
-  virtualisation.vmware.host.enable = true;
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  programs.gamemode.enable = true;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  system.stateVersion = "26.05"; # Did you read the comment?
-  virtualisation.libvirtd.enable = true;
-  boot.kernelModules = [ "kvm-amd" "kvm-intel" ];
-  # virtualisation.libvirtd.qemu = {
-  #   package = pkgs.qemu_kvm;
-  #   runAsRoot = true;
-  #   swtpm.enable = true;
-  # };
-  virtualisation.libvirtd = {
-    qemu = {
-      package = pkgs.qemu_kvm;
-      runAsRoot = true; # Tente mudar para true se estiver false
-      swtpm.enable = true; # Necessário para Windows 11 (TPM)
-    };
-  };
-  programs.virt-manager.enable = true;
-  virtualisation.spiceUSBRedirection.enable = true;
-
-  services.tailscale.enable = false;
-
-  # --------HARDWARE--------------
-  services.udev.extraRules = ''
-    KERNEL=="sda", SUBSYSTEM=="block", OWNER="root", GROUP="disk", MODE="0660"
-  '';
-  services.thermald.enable = true;
-  services.tlp.enable = true;
-  services.fwupd.enable = true;
-  hardware = {
-    enableAllFirmware = true;
-    bluetooth.enable = true;
-    bluetooth.powerOnBoot = true;
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-    };
-  };
 }
